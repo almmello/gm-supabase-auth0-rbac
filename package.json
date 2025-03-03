@@ -1,0 +1,27 @@
+{
+  "name": "gm-supabase-auth0-rbac",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@auth0/nextjs-auth0": "^3.5.0",
+    "@supabase/supabase-js": "^2.47.12",
+    "jsonwebtoken": "^9.0.2",
+    "next": "15.1.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.4",
+    "postcss": "^8",
+    "supabase": "^2.2.1",
+    "tailwindcss": "^3.4.1"
+  }
+}
