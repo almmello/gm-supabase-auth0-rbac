@@ -109,3 +109,71 @@ logTokenDetails(supabaseToken);
 - Remova logs de debug antes de enviar para produção
 
 **Atenção:** Esses logs são úteis para desenvolvimento e depuração, mas devem ser usados com cuidado em produção para evitar exposição de dados sensíveis.
+
+## 2. Atualizando as políticas de acesso via nova migração
+
+Nas migrações iniciais já foi executado o comando para habilitar o Row Level Security na tabela `todos` e, consequentemente, algumas políticas já foram criadas. Dessa forma, não é necessário executar novamente.
+
+Para atualizar as regras de acesso de acordo com as novas diretrizes, vamos criar uma nova migração de ajuste.
+
+Nesta nova migração, vamos redefinir as políticas para garantir que:
+
+- **SELECT (leitura):** um usuário com a role **admin** pode visualizar todos os registros; o usuário comum poderá visualizar apenas os registros cujo `user_id` seja igual ao seu próprio (extraído do claim `sub` do JWT).
+- **INSERT (inserção):** o admin pode inserir qualquer registro; o usuário comum só poderá inserir registros se o `user_id` informado for o seu próprio.
+- **UPDATE (atualização):** o admin pode atualizar qualquer registro; o usuário comum só poderá atualizar registros de que é dono.
+- **DELETE (exclusão):** apenas o admin poderá deletar registros.
+
+Crie uma nova migração (por exemplo, `20240112000005_update_rls_policies.sql`) com o seguinte conteúdo:
+
+```sql
+-- Atualização de política para SELECT: Admin pode ver todos; usuário vê apenas seus próprios
+DROP POLICY IF EXISTS "Todos_Select_Admin_ou_Proprio" ON public.todos;
+CREATE POLICY "Todos_Select_Admin_ou_Proprio" 
+ON public.todos
+FOR SELECT
+USING (
+  (auth.jwt() -> 'https://myapp.example.com/roles') @> '["admin"]'::jsonb
+  OR (auth.jwt() ->> 'sub' = user_id)
+);
+
+-- Atualização de política para INSERT: Admin insere qualquer, usuário somente se for o dono
+DROP POLICY IF EXISTS "Todos_Insert_Admin_ou_Proprio" ON public.todos;
+CREATE POLICY "Todos_Insert_Admin_ou_Proprio" 
+ON public.todos
+FOR INSERT
+WITH CHECK (
+  (auth.jwt() -> 'https://myapp.example.com/roles') @> '["admin"]'::jsonb
+  OR (auth.jwt() ->> 'sub' = user_id)
+);
+
+-- Atualização de política para UPDATE: Admin pode atualizar qualquer, usuário apenas seus próprios
+DROP POLICY IF EXISTS "Todos_Update_Admin_ou_Proprio" ON public.todos;
+CREATE POLICY "Todos_Update_Admin_ou_Proprio" 
+ON public.todos
+FOR UPDATE
+USING (
+  (auth.jwt() -> 'https://myapp.example.com/roles') @> '["admin"]'::jsonb
+  OR (auth.jwt() ->> 'sub' = user_id)
+)
+WITH CHECK (
+  (auth.jwt() -> 'https://myapp.example.com/roles') @> '["admin"]'::jsonb
+  OR (auth.jwt() ->> 'sub' = user_id)
+);
+
+-- Atualização de política para DELETE: apenas Admin
+DROP POLICY IF EXISTS "Todos_Delete_Admin" ON public.todos;
+CREATE POLICY "Todos_Delete_Admin" 
+ON public.todos
+FOR DELETE
+USING (
+  (auth.jwt() -> 'https://myapp.example.com/roles') @> '["admin"]'::jsonb
+);
+```
+
+Após criar essa nova migração, aplique-a utilizando o comando de migração do Supabase (por exemplo, via CLI com `npx supabase db push`) para que as novas regras sejam efetivadas no banco de dados.
+
+> **Observação:** Essa migração substitui as políticas existentes e assegura que as regras de acesso estejam atualizadas conforme a estrutura de RBAC definida (diferenciando admin e usuário comum).
+
+**Referências úteis:**
+- [Documentação oficial do Supabase sobre RLS](https://supabase.com/docs/guides/auth/row-level-security)
+- [Guia de migrações do Supabase](https://supabase.com/docs/guides/database/migrations)
