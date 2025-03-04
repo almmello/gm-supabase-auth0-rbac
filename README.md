@@ -65,3 +65,47 @@ Depois dessas configurações, quando um usuário fizer login, o Auth0 retornar�
 - O claim `role: "authenticated"`.
 
 Podemos agora usar esse token no Supabase para aplicar controle de acesso.
+
+### 1.4 Verificando e logando o JWT enriquecido
+
+Durante o desenvolvimento, é útil verificar se o JWT está sendo corretamente enriquecido com as informações necessárias. Podemos fazer isso adicionando logs para inspecionar o token:
+
+```js
+import jwt from 'jsonwebtoken';
+
+// Função para logar informações do token
+function logTokenDetails(supabaseToken) {
+  try {
+    const decoded = jwt.decode(supabaseToken);
+    
+    console.log('Token decodificado:', {
+      userId: decoded.sub,
+      roles: decoded['https://myapp.example.com/roles'],
+      expiration: new Date(decoded.exp * 1000).toLocaleString()
+    });
+    
+    return decoded;
+  } catch (error) {
+    console.error('Erro ao decodificar token:', error);
+    throw error;
+  }
+}
+
+// Uso no fluxo de autenticação
+const supabaseToken = session.user.accessToken;
+logTokenDetails(supabaseToken);
+```
+
+**O que estamos logando:**
+- `userId`: Identificador único do usuário
+- `roles`: Array de roles do usuário
+- `expiration`: Data de expiração do token formatada
+
+**Boas práticas para produção:**
+- Evite logar o token completo em produção
+- Use máscaras para informações sensíveis
+- Considere usar serviços de logging centralizados
+- Implemente níveis de log (debug, info, warn, error)
+- Remova logs de debug antes de enviar para produção
+
+**Atenção:** Esses logs são úteis para desenvolvimento e depuração, mas devem ser usados com cuidado em produção para evitar exposição de dados sensíveis.
