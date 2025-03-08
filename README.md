@@ -1,4 +1,6 @@
-# Adicionando RBAC (Role-Based Access Control) com Auth0 e Supabase em Next.js 15
+# gm-supabase-auth0-RBAC
+
+## Estrutura do Projeto
 
 Neste tutorial, vamos implementar controle de acesso por funções (RBAC) em um projeto **Next.js 15** integrado com **Auth0** (para autenticação) e **Supabase** (banco de dados PostgreSQL + API). Teremos dois papéis de usuário: **Admin** e **Usuário comum**, com permissões diferentes. Abordaremos:
 
@@ -8,6 +10,16 @@ Neste tutorial, vamos implementar controle de acesso por funções (RBAC) em um 
 4. **Boas práticas de segurança** – garantir validade do JWT, evitar exposições desnecessárias de dados sensíveis e outras dicas de segurança e performance na integração.
 
 Cada seção trará exemplos de código e explicações claras de cada etapa. Vamos começar! 🎯
+
+## Instruções de Reset do Banco de Dados
+
+Antes de iniciar o tutorial, é importante garantir que o banco de dados esteja em um estado limpo e sincronizado. Para isso, execute o seguinte comando:
+
+```bash
+npx supabase db reset --db-url postgresql://postgres:[sua-senha]@[sua-string-de-conexão] --debug
+```
+
+Isso irá restaurar o estado do banco de dados e aplicar todas as migrações necessárias.
 
 ## 1. Configurando o Auth0 para incluir roles no JWT
 
