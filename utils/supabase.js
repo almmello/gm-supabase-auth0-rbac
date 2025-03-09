@@ -15,6 +15,8 @@ const getSupabase = async (accessToken) => {
     }
   );
 
+  console.log('Supabase instance:', supabase); // Log da instância do Supabase
+
   return supabase;
 };
 

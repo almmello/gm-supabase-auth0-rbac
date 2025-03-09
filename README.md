@@ -244,3 +244,201 @@ Após criar essa nova migração, aplique-a utilizando o comando de migração d
 **Referências úteis:**
 - [Documentação oficial do Supabase sobre RLS](https://supabase.com/docs/guides/auth/row-level-security)
 - [Guia de migrações do Supabase](https://supabase.com/docs/guides/database/migrations)
+
+## 3. Implementando e testando as políticas RBAC na interface Next.js
+
+Agora que as políticas de segurança (RLS) foram definidas no Supabase e as roles estão sendo corretamente incluídas no JWT emitido pelo Auth0, vamos implementar uma interface prática para verificar se as permissões estão funcionando corretamente na aplicação frontend.
+
+Vamos realizar os seguintes passos:
+	•	✅ Verificar o carregamento das roles no frontend.
+	•	✅ Ajustar o componente pages/index.js para exibir conteúdos diferentes com base na role do usuário.
+	•	✅ Validar as políticas RLS diretamente na interface.
+
+### 3.1 – Verificando o recebimento das roles no frontend
+
+Primeiro, vamos garantir que as roles definidas no Auth0 estejam corretamente disponíveis no objeto user do Next.js.
+
+Edite o arquivo pages/api/auth/[...auth0].js para garantir que as roles sejam propagadas ao objeto da sessão corretamente:
+
+```javascript
+// pages/api/auth/[...auth0].js
+import { handleAuth, handleCallback } from "@auth0/nextjs-auth0";
+import jwt from "jsonwebtoken";
+
+const afterCallback = async (req, res, session) => {
+  const namespace = 'https://gm-supabase-tutorial.us.auth0.com';
+
+  session.user.roles = session.idTokenClaims[${namespace}/roles] || [];
+
+  const payload = {
+    userId: session.user.sub,
+    exp: Math.floor(Date.now() / 1000) + 60 * 60,
+    role: 'authenticated',
+    roles: session.user.roles
+  };
+
+  const supabaseToken = jwt.sign(payload, process.env.SUPABASE_SIGNING_SECRET);
+
+  session.user.accessToken = supabaseToken;
+
+  return session;
+};
+```
+
+Desta forma, teremos acesso direto às roles na aplicação através do objeto user.roles.
+
+### 3. Ajustando o Frontend para validação das Roles
+
+Agora que o backend está corretamente propagando as roles no JWT, podemos refletir essas diferenças diretamente no frontend, ajustando a interface de usuário para exibir ações baseadas nas permissões.
+
+#### Passo 1: Ajustar o getServerSideProps
+
+Arquivo: pages/index.js
+
+Substitua a função getServerSideProps atual por este trecho atualizado:
+
+```javascript
+import { withPageAuthRequired, getSession } from "@auth0/nextjs-auth0";
+import { getSupabase } from "../utils/supabase";
+
+export const getServerSideProps = withPageAuthRequired({
+  async getServerSideProps({ req, res }) {
+    const session = await getSession(req, res);
+    
+    const supabase = getSupabase(session.user.accessToken);
+    
+    const { data: todos, error } = await supabase.from('todos').select('*');
+
+    if (error) {
+      console.error("Erro ao buscar tarefas:", error);
+    }
+
+    return {
+      props: {
+        user: session.user,
+        todos: todos || [],
+      },
+    };
+  },
+});
+```
+
+Este código recupera corretamente os “todos” utilizando as permissões definidas pelas políticas RLS que criamos anteriormente.
+
+#### Passo 2: Ajustar o Componente React para exibir ações baseadas em Roles
+
+Arquivo: pages/index.js
+
+Atualize o componente principal da seguinte forma:
+
+```javascript
+// pages/index.js
+import { useState } from 'react';
+import { withPageAuthRequired } from '@auth0/nextjs-auth0';
+import { getSupabase } from '../utils/supabase';
+import Link from 'next/link';
+
+const Index = ({ user, todos }) => {
+  const [content, setContent] = useState('');
+  const [allTodos, setAllTodos] = useState(todos || []);
+
+  const isAdmin = user.roles.includes('admin');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const supabase = getSupabase(user.accessToken);
+
+    const { data, error } = await supabase
+      .from('todos')
+      .insert({ content, user_id: user.sub })
+      .select();
+
+    if (!error && data) {
+      setAllTodos([...allTodos, data[0]]);
+      setContent('');
+    } else {
+      console.error('Erro ao adicionar tarefa:', error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    const supabase = getSupabase(user.accessToken);
+    await supabase.from('todos').delete().eq('id', id);
+    setAllTodos(allTodos.filter(todo => todo.id !== id));
+  };
+
+  return (
+    <div className="container mx-auto p-8 min-h-screen flex flex-col items-center justify-center text-white">
+      <div className="w-full max-w-2xl space-y-6">
+        <p className="text-lg flex items-center justify-between">
+          <span>
+            Bem-vindo {user.name}! ({isAdmin ? 'Admin' : 'Usuário'})
+          </span>
+          <Link href="/api/auth/logout" className="text-blue-400 underline ml-2">
+            Sair
+          </Link>
+        </p>
+
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <input
+            type="text"
+            onChange={(e) => setContent(e.target.value)}
+            value={content}
+            placeholder="Adicione uma nova tarefa..."
+            className="flex-1 p-2 border rounded bg-gray-800 text-white"
+          />
+          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+            Adicionar
+          </button>
+        </form>
+
+        <div className="space-y-4">
+          {allTodos.length > 0 ? (
+            allTodos.map(todo => (
+              <div key={todo.id} className="flex justify-between items-center p-4 bg-gray-800 rounded-lg">
+                <span>{todo.content}</span>
+                {isAdmin && (
+                  <button
+                    className="text-red-400 hover:text-red-300"
+                    onClick={() => handleDelete(todo.id)}
+                  >
+                    Excluir
+                  </button>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-400 text-center">Você completou todas as tarefas!</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const getServerSideProps = withPageAuthRequired({
+  async getServerSideProps({ req, res }) {
+    const session = await getSession(req, res);
+    const supabase = getSupabase(session.user.accessToken);
+    const { data: todos } = await supabase.from('todos').select('*');
+
+    return {
+      props: {
+        user: {
+          ...session.user,
+          roles: session.user['https://gm-supabase-tutorial.us.auth0.com/roles'] || [],
+          accessToken: session.user.accessToken
+        },
+        todos,
+      }
+    };
+  },
+});
+
+export default Index;
+```
+
+🛠️ O que fizemos aqui?
+	•	Criamos uma lógica para exibir condicionalmente o botão “Excluir” apenas para usuários Admin.
+	•	Ajustamos a captura correta das roles com o namespace correto, refletindo a configuração no Auth0 (https://gm-supabase-tutorial.us.auth0.com/roles).
+	•	Garantimos que o frontend leia corretamente as roles recebidas pelo JWT emitido pelo Auth0.

@@ -1,6 +1,6 @@
 // pages/api/auth/[...auth0].js
 
-import { handleAuth, handleCallback } from "@auth0/nextjs-auth0";
+import { handleAuth, handleCallback, handleLogin } from "@auth0/nextjs-auth0";
 import jwt from "jsonwebtoken";
 
 // Logger configurável
@@ -13,27 +13,26 @@ const logger = {
 };
 
 const afterCallback = async (req, res, session) => {
-  // Log do JWT recebido do Auth0
+  const decodedToken = jwt.decode(session.idToken);
+  const namespace = process.env.AUTH0_NAMESPACE;
+
   logger.log('JWT recebido do Auth0:', {
     token: session.idToken,
-    claims: jwt.decode(session.idToken)
+    claims: decodedToken
   });
 
-  const decodedToken = jwt.decode(session.idToken);
+  // Adicionando log para verificar as roles
+  console.log('ID Token Claims:', decodedToken); // Adicionar log aqui
 
   const payload = {
     userId: session.user.sub,
     exp: Math.floor(Date.now() / 1000) + 60 * 60,
-    role: "authenticated",
-    'https://gm-supabase-tutorial.us.auth0.com/roles':
-      decodedToken['https://gm-supabase-tutorial.us.auth0.com/roles'],
+    role: 'authenticated',
+    roles: decodedToken[`${namespace}/roles`] || [], // Corrigido para atribuir as roles
   };
 
   const supabaseToken = jwt.sign(payload, process.env.SUPABASE_SIGNING_SECRET);
 
-
-
-  // Log do token gerado para o Supabase
   logger.log('Token gerado para o Supabase:', {
     token: supabaseToken,
     claims: jwt.decode(supabaseToken)
@@ -44,6 +43,14 @@ const afterCallback = async (req, res, session) => {
 };
 
 export default handleAuth({
+  async login(req, res) {
+    return handleLogin(req, res, {
+      authorizationParams: {
+        audience: process.env.AUTH0_AUDIENCE,
+        scope: 'openid profile email'
+      }
+    });
+  },
   async callback(req, res) {
     try {
       await handleCallback(req, res, { afterCallback });
