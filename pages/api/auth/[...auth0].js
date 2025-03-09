@@ -19,15 +19,19 @@ const afterCallback = async (req, res, session) => {
     claims: jwt.decode(session.idToken)
   });
 
+  const decodedToken = jwt.decode(session.idToken);
+
   const payload = {
     userId: session.user.sub,
     exp: Math.floor(Date.now() / 1000) + 60 * 60,
+    role: "authenticated",
+    'https://gm-supabase-tutorial.us.auth0.com/roles':
+      decodedToken['https://gm-supabase-tutorial.us.auth0.com/roles'],
   };
 
-  const supabaseToken = jwt.sign(
-    payload,
-    process.env.SUPABASE_SIGNING_SECRET
-  );
+  const supabaseToken = jwt.sign(payload, process.env.SUPABASE_SIGNING_SECRET);
+
+
 
   // Log do token gerado para o Supabase
   logger.log('Token gerado para o Supabase:', {

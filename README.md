@@ -80,7 +80,7 @@ Podemos agora usar esse token no Supabase para aplicar controle de acesso.
 
 ### 1.4 Verificando e logando o JWT enriquecido
 
-Durante o desenvolvimento, é útil verificar se o JWT está sendo corretamente enriquecido com as informações necessárias. Podemos fazer isso adicionando logs para inspecionar o token:
+Durante o desenvolvimento, é útil verificar se o JWT está sendo corretamente enriquecido com as informações necessárias. Podemos fazer isso adicionando logs para inspecionar o token no arquivo pages/api/auth/[..auth0].js]:
 
 ```js
 import jwt from 'jsonwebtoken';
@@ -121,6 +121,61 @@ logTokenDetails(supabaseToken);
 - Remova logs de debug antes de enviar para produção
 
 **Atenção:** Esses logs são úteis para desenvolvimento e depuração, mas devem ser usados com cuidado em produção para evitar exposição de dados sensíveis.
+
+Como fica a versão final do arquivo `pages/api/auth/[...auth0].js`:
+
+```js
+// pages/api/auth/[...auth0].js
+
+import { handleAuth, handleCallback } from "@auth0/nextjs-auth0";
+import jwt from "jsonwebtoken";
+
+// Logger configurável
+const logger = {
+  log: (...args) => {
+    if (process.env.DEBUG_LOG === 'true') {
+      console.log('[DEBUG]', ...args);
+    }
+  }
+};
+
+const afterCallback = async (req, res, session) => {
+  // Log do JWT recebido do Auth0
+  logger.log('JWT recebido do Auth0:', {
+    token: session.idToken,
+    claims: jwt.decode(session.idToken)
+  });
+
+  const payload = {
+    userId: session.user.sub,
+    exp: Math.floor(Date.now() / 1000) + 60 * 60,
+  };
+
+  const supabaseToken = jwt.sign(
+    payload,
+    process.env.SUPABASE_SIGNING_SECRET
+  );
+
+  // Log do token gerado para o Supabase
+  logger.log('Token gerado para o Supabase:', {
+    token: supabaseToken,
+    claims: jwt.decode(supabaseToken)
+  });
+
+  session.user.accessToken = supabaseToken;
+  return session;
+};
+
+export default handleAuth({
+  async callback(req, res) {
+    try {
+      await handleCallback(req, res, { afterCallback });
+    } catch (error) {
+      res.status(error.status || 500).end(error.message);
+    }
+  },
+});
+```
 
 ## 2. Atualizando as políticas de acesso via nova migração
 
