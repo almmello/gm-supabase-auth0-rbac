@@ -1,9 +1,9 @@
 // utils/supabase.js
+import { createClient } from '@supabase/supabase-js';
 
-import { createClient } from "@supabase/supabase-js";
-
-const getSupabase = async (accessToken) => {
-  const supabase = createClient(
+export function getSupabase(accessToken) {
+  // Retorna o objeto SupabaseClient diretamente
+  return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
@@ -14,10 +14,4 @@ const getSupabase = async (accessToken) => {
       },
     }
   );
-
-  console.log('Supabase instance:', supabase); // Log da instância do Supabase
-
-  return supabase;
-};
-
-export { getSupabase };
+}
