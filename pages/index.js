@@ -1,4 +1,3 @@
-// pages/index.js
 import { useState } from 'react';
 import { withPageAuthRequired, getSession } from '@auth0/nextjs-auth0';
 import { getSupabase } from '../utils/supabase';
@@ -52,19 +51,14 @@ const TodoForm = ({ onSubmit }) => {
 };
 
 const Index = ({ user, todos }) => {
-  console.log('User object:', user); // Adicionar log aqui
-  console.log('User roles:', user['gm-supabase-tutorial.us.auth0.com/roles']); // Adicionar log aqui
-
-  console.log('User roles in Index:', user.roles); // Adicionar log aqui
   const [allTodos, setAllTodos] = useState(todos || []);
+  const [successMessage, setSuccessMessage] = useState(''); // State to store success messages
+  const [errorMessage, setErrorMessage] = useState(''); // State to store error messages
   const isAdmin = user.roles.includes('admin');
 
-const handleAddTodo = async (content) => {
-  const supabase = await getSupabase(user.accessToken);
-  
-  // Teste de busca
-  const { data: testTodos, error: testError } = await supabase.from('todos').select('*');
-  console.log('Test Todos:', testTodos, 'Error:', testError); // Log para verificar se a busca funciona
+  const handleAddTodo = async (content) => {
+    const supabase = await getSupabase(user.accessToken);
+    
     const { data, error } = await supabase
       .from('todos')
       .insert({ content, user_id: user.sub })
@@ -78,8 +72,32 @@ const handleAddTodo = async (content) => {
   };
 
   const handleDelete = async (id) => {
+    console.log('Attempting to delete todo with ID:', id); // Log the ID being deleted
+    console.log('User access token:', user.accessToken); // Log the access token
     const supabase = getSupabase(user.accessToken);
-    await supabase.from('todos').delete().eq('id', id);
+    console.log('Supabase client:', supabase); // Log the Supabase client configuration
+    const existingTodo = await supabase.from('todos').select('*').eq('id', id);
+    console.log('Existing todo before delete:', existingTodo); // Log the existing todo
+    console.log('Attempting to delete todo with ID:', id); // Log the ID being deleted
+    console.log('Deleting todo with ID:', id); // Log the ID being deleted
+    console.log('Delete request:', { id }); // Log the request details
+    const { data, error } = await supabase.from('todos').delete().eq('id', id);
+    console.log('Delete response:', { data, error }); // Log the response from Supabase
+    console.log('Delete request:', { id }); // Log the request details
+    console.log('Delete response:', { data, error }); // Log the response from Supabase
+    if (error) {
+      console.error('Erro ao excluir tarefa:', error.message || error); // Log the error message from Supabase
+      setErrorMessage('Erro ao excluir tarefa: ' + (error.message || 'Unknown error')); // Set error message
+    } else {
+      console.log('Successfully deleted todo:', data);
+      setSuccessMessage('Registro excluído com sucesso!'); // Set success message
+      setErrorMessage(''); // Clear error message on success
+    }
+    if (error) {
+      console.error('Erro ao excluir tarefa:', error.message || error); // Log the error message from Supabase
+    } else {
+      console.log('Successfully deleted todo:', data);
+    }
     setAllTodos(allTodos.filter(todo => todo.id !== id));
   };
 
@@ -105,13 +123,9 @@ const handleAddTodo = async (content) => {
 export const getServerSideProps = withPageAuthRequired({
   async getServerSideProps({ req, res }) {
     const session = await getSession(req, res);
-    console.log('Session user:', session.user); // Adicionar log aqui
     const supabase = await getSupabase(session.user.accessToken);
-    
-    console.log('Supabase instance in getServerSideProps:', supabase); // Adicionar log aqui
     const { data: todos } = await supabase.from('todos').select('*');
 
-    console.log('Session user roles:', session.user['gm-supabase-tutorial.us.auth0.com/roles']); // Adicionar log aqui
     return {
       props: {
         user: {
