@@ -14,7 +14,7 @@ const logger = {
 
 const afterCallback = async (req, res, session) => {
   const decodedToken = jwt.decode(session.idToken);
-  const namespace = process.env.AUTH0_NAMESPACE;
+  const namespace = 'gm-supabase-tutorial.us.auth0.com'; // Hardcoded namespace
 
   logger.log('JWT recebido do Auth0:', {
     token: session.idToken,
@@ -23,6 +23,15 @@ const afterCallback = async (req, res, session) => {
 
   // Adicionando log para verificar as roles
   console.log('ID Token Claims:', decodedToken); // Adicionar log aqui
+  console.log('Namespace:', namespace); // Log para verificar o namespace
+  console.log('Roles from decodedToken:', decodedToken[`${namespace}/roles`]); // Log para verificar as roles
+  console.log('Session user before assignment:', session.user); // Log para verificar o estado do session.user
+  console.log('Decoded roles:', decodedToken[`${namespace}/roles`]); // Log para verificar as roles
+  console.log('Session user after assignment:', session.user); // Log para verificar o estado do session.user após a atribuição
+  console.log('Roles assigned to session.user:', session.user[`${namespace}/roles`]); // Log para verificar as roles atribuídas
+  console.log('Decoded roles after assignment:', decodedToken[`${namespace}/roles`]); // Log para verificar as roles decodificadas
+  console.log('Session user roles after assignment:', session.user[`${namespace}/roles`]); // Log para verificar as roles atribuídas
+  console.log('Namespace after assignment:', namespace); // Log para verificar o namespace
 
   const payload = {
     userId: session.user.sub,
@@ -30,6 +39,8 @@ const afterCallback = async (req, res, session) => {
     role: 'authenticated',
     roles: decodedToken[`${namespace}/roles`] || [], // Corrigido para atribuir as roles
   };
+
+  session.user[`${namespace}/roles`] = decodedToken[`${namespace}/roles`] || []; // Adicionando as roles ao session.user
 
   const supabaseToken = jwt.sign(payload, process.env.SUPABASE_SIGNING_SECRET);
 

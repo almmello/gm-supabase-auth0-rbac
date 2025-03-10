@@ -53,7 +53,7 @@ const TodoForm = ({ onSubmit }) => {
 
 const Index = ({ user, todos }) => {
   console.log('User object:', user); // Adicionar log aqui
-  console.log('User roles:', user['https://gm-supabase-tutorial.us.auth0.com/roles']); // Adicionar log aqui
+  console.log('User roles:', user['gm-supabase-tutorial.us.auth0.com/roles']); // Adicionar log aqui
 
   console.log('User roles in Index:', user.roles); // Adicionar log aqui
   const [allTodos, setAllTodos] = useState(todos || []);
@@ -111,12 +111,12 @@ export const getServerSideProps = withPageAuthRequired({
     console.log('Supabase instance in getServerSideProps:', supabase); // Adicionar log aqui
     const { data: todos } = await supabase.from('todos').select('*');
 
-    console.log('Session user roles:', session.user['https://gm-supabase-tutorial.us.auth0.com/roles']); // Adicionar log aqui
+    console.log('Session user roles:', session.user['gm-supabase-tutorial.us.auth0.com/roles']); // Adicionar log aqui
     return {
       props: {
         user: {
           ...session.user,
-          roles: session.user['https://gm-supabase-tutorial.us.auth0.com/roles'] || [],
+          roles: session.user['gm-supabase-tutorial.us.auth0.com/roles'] || [],
           accessToken: session.user.accessToken
         },
         todos,
