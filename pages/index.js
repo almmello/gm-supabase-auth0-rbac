@@ -71,35 +71,78 @@ const Index = ({ user, todos }) => {
     }
   };
 
-  const handleDelete = async (id) => {
-    console.log('Attempting to delete todo with ID:', id); // Log the ID being deleted
-    console.log('User access token:', user.accessToken); // Log the access token
-    const supabase = getSupabase(user.accessToken);
-    console.log('Supabase client:', supabase); // Log the Supabase client configuration
-    const existingTodo = await supabase.from('todos').select('*').eq('id', id);
-    console.log('Existing todo before delete:', existingTodo); // Log the existing todo
-    console.log('Attempting to delete todo with ID:', id); // Log the ID being deleted
-    console.log('Deleting todo with ID:', id); // Log the ID being deleted
-    console.log('Delete request:', { id }); // Log the request details
-    const { data, error } = await supabase.from('todos').delete().eq('id', id);
-    console.log('Delete response:', { data, error }); // Log the response from Supabase
-    console.log('Delete request:', { id }); // Log the request details
-    console.log('Delete response:', { data, error }); // Log the response from Supabase
-    if (error) {
-      console.error('Erro ao excluir tarefa:', error.message || error); // Log the error message from Supabase
-      setErrorMessage('Erro ao excluir tarefa: ' + (error.message || 'Unknown error')); // Set error message
-    } else {
-      console.log('Successfully deleted todo:', data);
-      setSuccessMessage('Registro excluído com sucesso!'); // Set success message
-      setErrorMessage(''); // Clear error message on success
-    }
-    if (error) {
-      console.error('Erro ao excluir tarefa:', error.message || error); // Log the error message from Supabase
-    } else {
-      console.log('Successfully deleted todo:', data);
-    }
-    setAllTodos(allTodos.filter(todo => todo.id !== id));
-  };
+const handleDelete = async (id) => {
+  console.log("[handleDelete] Called with ID:", id);
+
+  // Pega o Supabase client com o token do usuário
+  const supabase = getSupabase(user.accessToken);
+
+  // 1) Checagem antes do DELETE
+  const { data: checkBefore, error: errorBefore } = await supabase
+    .from("todos")
+    .select("*")
+    .eq("id", id);
+
+  console.log("[handleDelete] Check BEFORE delete =>", {
+    checkBefore,
+    errorBefore,
+  });
+
+  if (errorBefore) {
+    console.error("[handleDelete] Erro ao checar antes de excluir:", errorBefore);
+    return;
+  }
+  if (!checkBefore || checkBefore.length === 0) {
+    console.warn("[handleDelete] Nenhuma linha encontrada com ID =", id, "antes de deletar");
+    return;
+  }
+
+    // Check for the row before deletion
+    const { data: found, error: foundError } = await supabase
+      .from('todos')
+      .select('*')
+      .eq('id', id);
+    console.log("Found rows before delete =>", found);
+  const { data: delData, error: delError } = await supabase
+    .from("todos")
+    .delete()
+    .eq("id", id)
+    .select("*"); // <--- Para ver o que foi removido
+
+  console.log("[handleDelete] Delete response =>", {
+    delData,
+    delError,
+  });
+
+  if (delError) {
+    console.error("[handleDelete] Erro ao excluir:", delError);
+    return;
+  }
+
+  // 3) Checar depois do DELETE se a linha sumiu
+  const { data: checkAfter, error: errorAfter } = await supabase
+    .from("todos")
+    .select("*")
+    .eq("id", id);
+
+  console.log("[handleDelete] Check AFTER delete =>", {
+    checkAfter,
+    errorAfter,
+  });
+
+  if (errorAfter) {
+    console.error("[handleDelete] Erro ao checar depois de excluir:", errorAfter);
+    return;
+  }
+  if (!checkAfter || checkAfter.length === 0) {
+    console.log("[handleDelete] Linha ID =", id, "foi realmente removida do banco!");
+  } else {
+    console.warn("[handleDelete] Linha ID =", id, "ainda existe =>", checkAfter);
+  }
+
+  // 4) Se deu certo, atualiza o estado local
+  setAllTodos(allTodos.filter((todo) => todo.id !== id));
+};
 
   return (
     <div className="container mx-auto p-8 min-h-screen flex flex-col items-center justify-center text-white">

@@ -4,7 +4,7 @@ CREATE POLICY "Todos_Select_Admin_ou_Proprio"
 ON public.todos
 FOR SELECT
 USING (
-  (auth.jwt() -> 'gm-supabase-tutorial.us.auth0.com/roles') @> '["admin"]'::jsonb
+  (auth.jwt() -> 'roles') @> '["admin"]'::jsonb
   OR (auth.jwt() ->> 'sub' = user_id)
 );
 
@@ -14,7 +14,7 @@ CREATE POLICY "Todos_Insert_Admin_ou_Proprio"
 ON public.todos
 FOR INSERT
 WITH CHECK (
-  (auth.jwt() -> 'gm-supabase-tutorial.us.auth0.com/roles') @> '["admin"]'::jsonb
+  (auth.jwt() -> 'roles') @> '["admin"]'::jsonb
   OR (auth.jwt() ->> 'sub' = user_id)
 );
 
@@ -24,11 +24,11 @@ CREATE POLICY "Todos_Update_Admin_ou_Proprio"
 ON public.todos
 FOR UPDATE
 USING (
-  (auth.jwt() -> 'gm-supabase-tutorial.us.auth0.com/roles') @> '["admin"]'::jsonb
+  (auth.jwt() -> 'roles') @> '["admin"]'::jsonb
   OR (auth.jwt() ->> 'sub' = user_id)
 )
 WITH CHECK (
-  (auth.jwt() -> 'gm-supabase-tutorial.us.auth0.com/roles') @> '["admin"]'::jsonb
+  (auth.jwt() -> 'roles') @> '["admin"]'::jsonb
   OR (auth.jwt() ->> 'sub' = user_id)
 );
 
@@ -38,5 +38,5 @@ CREATE POLICY "Todos_Delete_Admin"
 ON public.todos
 FOR DELETE
 USING (
-  (auth.jwt() -> 'gm-supabase-tutorial.us.auth0.com/roles') @> '["admin"]'::jsonb
+  (auth.jwt() -> 'roles') @> '["admin"]'::jsonb
 );
