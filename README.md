@@ -21,7 +21,7 @@ npx supabase db reset --db-url postgresql://postgres:[sua-senha]@[sua-string-de-
 
 Isso irá restaurar o estado do banco de dados e aplicar todas as migrações necessárias.
 
-## 1. Configurando o Auth0 para incluir roles no JWT
+## 1. Configurando o Auth0 para incluir roles no JWT e gerando o token para o Supabase
 
 Para que o Supabase saiba qual é a role do usuário autenticado, precisamos garantir que o token JWT emitido pelo Auth0 contenha essa informação. Faremos isso através do sistema de **Roles** do Auth0 e de uma **Action** (ação pós-login) que insere as roles no JWT.
 
@@ -127,36 +127,50 @@ Como fica a versão final do arquivo `pages/api/auth/[...auth0].js`:
 ```js
 // pages/api/auth/[...auth0].js
 
-import { handleAuth, handleCallback } from "@auth0/nextjs-auth0";
+import { handleAuth, handleCallback, handleLogin } from "@auth0/nextjs-auth0";
 import jwt from "jsonwebtoken";
 
 // Logger configurável
 const logger = {
   log: (...args) => {
-    if (process.env.DEBUG_LOG === 'true') {
+    if (process.env.NEXT_PUBLIC_DEBUG_MODE === 'true') {
       console.log('[DEBUG]', ...args);
     }
   }
 };
 
 const afterCallback = async (req, res, session) => {
-  // Log do JWT recebido do Auth0
+  const decodedToken = jwt.decode(session.idToken);
+  const namespace = process.env.NEXT_PUBLIC_AUTH0_NAMESPACE; 
+
   logger.log('JWT recebido do Auth0:', {
     token: session.idToken,
-    claims: jwt.decode(session.idToken)
+    claims: decodedToken
   });
+
+  // Adicionando log para verificar as roles
+  logger.log('ID Token Claims:', decodedToken);
+  logger.log('Namespace:', namespace);
+  logger.log('Roles from decodedToken:', decodedToken[`${namespace}/roles`]);
+  logger.log('Session user before assignment:', session.user);
+  logger.log('Decoded roles:', decodedToken[`${namespace}/roles`]);
+  logger.log('Session user after assignment:', session.user);
+  logger.log('Roles assigned to session.user:', session.user[`${namespace}/roles`]);
+  logger.log('Decoded roles after assignment:', decodedToken[`${namespace}/roles`]);
+  logger.log('Session user roles after assignment:', session.user[`${namespace}/roles`]);
+  logger.log('Namespace after assignment:', namespace);
 
   const payload = {
     userId: session.user.sub,
     exp: Math.floor(Date.now() / 1000) + 60 * 60,
+    role: 'authenticated',
+    roles: decodedToken[`${namespace}/roles`] || [],
   };
 
-  const supabaseToken = jwt.sign(
-    payload,
-    process.env.SUPABASE_SIGNING_SECRET
-  );
+  session.user[`${namespace}/roles`] = decodedToken[`${namespace}/roles`] || [];
 
-  // Log do token gerado para o Supabase
+  const supabaseToken = jwt.sign(payload, process.env.SUPABASE_SIGNING_SECRET);
+
   logger.log('Token gerado para o Supabase:', {
     token: supabaseToken,
     claims: jwt.decode(supabaseToken)
@@ -167,6 +181,14 @@ const afterCallback = async (req, res, session) => {
 };
 
 export default handleAuth({
+  async login(req, res) {
+    return handleLogin(req, res, {
+      authorizationParams: {
+        audience: process.env.AUTH0_AUDIENCE,
+        scope: 'openid profile email'
+      }
+    });
+  },
   async callback(req, res) {
     try {
       await handleCallback(req, res, { afterCallback });
@@ -250,15 +272,22 @@ Após criar essa nova migração, aplique-a utilizando o comando de migração d
 Agora que as políticas de segurança (RLS) foram definidas no Supabase e as roles estão sendo corretamente incluídas no JWT emitido pelo Auth0, vamos implementar uma interface prática para verificar se as permissões estão funcionando corretamente na aplicação frontend.
 
 Vamos realizar os seguintes passos:
-	•	✅ Verificar o carregamento das roles no frontend.
-	•	✅ Ajustar o componente pages/index.js para exibir conteúdos diferentes com base na role do usuário.
-	•	✅ Validar as políticas RLS diretamente na interface.
+
+- ✅ **Verificar o carregamento das roles no frontend.**
+- ✅ **Ajustar o componente `pages/index.js` para exibir conteúdos diferentes com base na role do usuário.**
+- ✅ **Validar as políticas RLS diretamente na interface.**
+
+---
+
+## 3. Integrando RBAC no Frontend (Next.js)
+
+Com as roles já presentes no JWT recebido do Auth0, vamos implementar uma interface que diferencia as funcionalidades acessíveis a um usuário comum de um administrador.
 
 ### 3.1 – Verificando o recebimento das roles no frontend
 
-Primeiro, vamos garantir que as roles definidas no Auth0 estejam corretamente disponíveis no objeto user do Next.js.
+Primeiro, vamos garantir que as roles definidas no Auth0 estejam corretamente disponíveis no objeto `user` do Next.js.
 
-Edite o arquivo pages/api/auth/[...auth0].js para garantir que as roles sejam propagadas ao objeto da sessão corretamente:
+**Edite** o arquivo `pages/api/auth/[...auth0].js` para garantir que as roles sejam propagadas ao objeto da sessão corretamente:
 
 ```javascript
 // pages/api/auth/[...auth0].js
@@ -268,7 +297,7 @@ import jwt from "jsonwebtoken";
 const afterCallback = async (req, res, session) => {
   const namespace = 'https://gm-supabase-tutorial.us.auth0.com';
 
-  session.user.roles = session.idTokenClaims[${namespace}/roles] || [];
+  session.user.roles = session.idTokenClaims[`${namespace}/roles`] || [];
 
   const payload = {
     userId: session.user.sub,
@@ -285,17 +314,19 @@ const afterCallback = async (req, res, session) => {
 };
 ```
 
-Desta forma, teremos acesso direto às roles na aplicação através do objeto user.roles.
+Desta forma, teremos acesso direto às roles na aplicação através do objeto `user.roles`.
 
-### 3. Ajustando o Frontend para validação das Roles
+---
+
+## 3. Ajustando o Frontend para validação das Roles
 
 Agora que o backend está corretamente propagando as roles no JWT, podemos refletir essas diferenças diretamente no frontend, ajustando a interface de usuário para exibir ações baseadas nas permissões.
 
-#### Passo 1: Ajustar o getServerSideProps
+### Passo 1: Ajustar o `getServerSideProps`
 
-Arquivo: pages/index.js
+**Arquivo:** `pages/index.js`
 
-Substitua a função getServerSideProps atual por este trecho atualizado:
+Substitua a função `getServerSideProps` atual por este trecho atualizado:
 
 ```javascript
 import { withPageAuthRequired, getSession } from "@auth0/nextjs-auth0";
@@ -323,19 +354,19 @@ export const getServerSideProps = withPageAuthRequired({
 });
 ```
 
-Este código recupera corretamente os “todos” utilizando as permissões definidas pelas políticas RLS que criamos anteriormente.
+> Este código recupera corretamente os "todos" utilizando as permissões definidas pelas políticas RLS que criamos anteriormente.
 
-#### Passo 2: Ajustar o Componente React para exibir ações baseadas em Roles
+### Passo 2: Ajustar o Componente React para exibir ações baseadas em Roles
 
-Arquivo: pages/index.js
+**Arquivo:** `pages/index.js`
 
 Atualize o componente principal da seguinte forma:
 
-```javascript
+```jsx
 // pages/index.js
 import { useState } from 'react';
 import { withPageAuthRequired } from '@auth0/nextjs-auth0';
-import { getSupabase } from '../utils/supabase';
+import { getSupabase } from "../utils/supabase";
 import Link from 'next/link';
 
 const Index = ({ user, todos }) => {
@@ -438,7 +469,18 @@ export const getServerSideProps = withPageAuthRequired({
 export default Index;
 ```
 
-🛠️ O que fizemos aqui?
-	•	Criamos uma lógica para exibir condicionalmente o botão “Excluir” apenas para usuários Admin.
-	•	Ajustamos a captura correta das roles com o namespace correto, refletindo a configuração no Auth0 (https://gm-supabase-tutorial.us.auth0.com/roles).
-	•	Garantimos que o frontend leia corretamente as roles recebidas pelo JWT emitido pelo Auth0.
+### 🛠️ O que fizemos aqui?
+
+- Criamos uma lógica para exibir condicionalmente o botão **"Excluir"** apenas para usuários Admin.
+- Ajustamos a captura correta das roles com o namespace correto, refletindo a configuração no Auth0 (`https://gm-supabase-tutorial.us.auth0.com/roles`).
+- Garantimos que o frontend leia corretamente as roles recebidas pelo JWT emitido pelo Auth0.
+
+---
+
+## ✅ Próximos passos para validar esta implementação:
+
+1. **Faça login como usuário Admin** e confirme que o botão "Excluir" aparece corretamente.
+2. **Faça login como usuário Comum** e verifique que o botão "Excluir" não aparece, confirmando o funcionamento correto das regras RLS no Supabase.
+3. Teste as operações (listar, adicionar, editar, excluir) com ambos usuários para validar as políticas de segurança e a interface.
+
+Essas instruções encerram a configuração básica para validação das roles no frontend. Caso precise de ajustes ou validações adicionais, estarei aqui para te ajudar!
