@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 // Logger configurável
 const logger = {
   log: (...args) => {
-    if (process.env.DEBUG_LOG === 'true') {
+    if (process.env.NEXT_PUBLIC_DEBUG_MODE === 'true') {
       console.log('[DEBUG]', ...args);
     }
   }
@@ -14,7 +14,7 @@ const logger = {
 
 const afterCallback = async (req, res, session) => {
   const decodedToken = jwt.decode(session.idToken);
-  const namespace = 'gm-supabase-tutorial.us.auth0.com'; // Hardcoded namespace
+  const namespace = process.env.NEXT_PUBLIC_AUTH0_NAMESPACE; 
 
   logger.log('JWT recebido do Auth0:', {
     token: session.idToken,
@@ -22,25 +22,25 @@ const afterCallback = async (req, res, session) => {
   });
 
   // Adicionando log para verificar as roles
-  console.log('ID Token Claims:', decodedToken); // Adicionar log aqui
-  console.log('Namespace:', namespace); // Log para verificar o namespace
-  console.log('Roles from decodedToken:', decodedToken[`${namespace}/roles`]); // Log para verificar as roles
-  console.log('Session user before assignment:', session.user); // Log para verificar o estado do session.user
-  console.log('Decoded roles:', decodedToken[`${namespace}/roles`]); // Log para verificar as roles
-  console.log('Session user after assignment:', session.user); // Log para verificar o estado do session.user após a atribuição
-  console.log('Roles assigned to session.user:', session.user[`${namespace}/roles`]); // Log para verificar as roles atribuídas
-  console.log('Decoded roles after assignment:', decodedToken[`${namespace}/roles`]); // Log para verificar as roles decodificadas
-  console.log('Session user roles after assignment:', session.user[`${namespace}/roles`]); // Log para verificar as roles atribuídas
-  console.log('Namespace after assignment:', namespace); // Log para verificar o namespace
+  logger.log('ID Token Claims:', decodedToken);
+  logger.log('Namespace:', namespace);
+  logger.log('Roles from decodedToken:', decodedToken[`${namespace}/roles`]);
+  logger.log('Session user before assignment:', session.user);
+  logger.log('Decoded roles:', decodedToken[`${namespace}/roles`]);
+  logger.log('Session user after assignment:', session.user);
+  logger.log('Roles assigned to session.user:', session.user[`${namespace}/roles`]);
+  logger.log('Decoded roles after assignment:', decodedToken[`${namespace}/roles`]);
+  logger.log('Session user roles after assignment:', session.user[`${namespace}/roles`]);
+  logger.log('Namespace after assignment:', namespace);
 
   const payload = {
     userId: session.user.sub,
     exp: Math.floor(Date.now() / 1000) + 60 * 60,
     role: 'authenticated',
-    roles: decodedToken[`${namespace}/roles`] || [], // Corrigido para atribuir as roles
+    roles: decodedToken[`${namespace}/roles`] || [],
   };
 
-  session.user[`${namespace}/roles`] = decodedToken[`${namespace}/roles`] || []; // Adicionando as roles ao session.user
+  session.user[`${namespace}/roles`] = decodedToken[`${namespace}/roles`] || [];
 
   const supabaseToken = jwt.sign(payload, process.env.SUPABASE_SIGNING_SECRET);
 

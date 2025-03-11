@@ -52,12 +52,14 @@ const TodoForm = ({ onSubmit }) => {
 
 const Index = ({ user, todos }) => {
   const [allTodos, setAllTodos] = useState(todos || []);
-  const [successMessage, setSuccessMessage] = useState(''); // State to store success messages
-  const [errorMessage, setErrorMessage] = useState(''); // State to store error messages
   const isAdmin = user.roles.includes('admin');
 
+  const getSupabaseClient = async () => {
+    return await getSupabase(user.accessToken);
+  };
+
   const handleAddTodo = async (content) => {
-    const supabase = await getSupabase(user.accessToken);
+    const supabase = await getSupabaseClient();
     
     const { data, error } = await supabase
       .from('todos')
@@ -72,75 +74,26 @@ const Index = ({ user, todos }) => {
   };
 
 const handleDelete = async (id) => {
-  console.log("[handleDelete] Called with ID:", id);
+  const supabase = await getSupabaseClient();
 
-  // Pega o Supabase client com o token do usuário
-  const supabase = getSupabase(user.accessToken);
-
-  // 1) Checagem antes do DELETE
-  const { data: checkBefore, error: errorBefore } = await supabase
-    .from("todos")
-    .select("*")
-    .eq("id", id);
-
-  console.log("[handleDelete] Check BEFORE delete =>", {
-    checkBefore,
-    errorBefore,
-  });
-
-  if (errorBefore) {
-    console.error("[handleDelete] Erro ao checar antes de excluir:", errorBefore);
-    return;
-  }
-  if (!checkBefore || checkBefore.length === 0) {
-    console.warn("[handleDelete] Nenhuma linha encontrada com ID =", id, "antes de deletar");
-    return;
-  }
-
-    // Check for the row before deletion
-    const { data: found, error: foundError } = await supabase
-      .from('todos')
-      .select('*')
-      .eq('id', id);
-    console.log("Found rows before delete =>", found);
   const { data: delData, error: delError } = await supabase
     .from("todos")
     .delete()
     .eq("id", id)
-    .select("*"); // <--- Para ver o que foi removido
+    .select("*");
 
-  console.log("[handleDelete] Delete response =>", {
-    delData,
-    delError,
-  });
+  if (process.env.NEXT_PUBLIC_DEBUG_MODE === 'true') {
+    console.log("[handleDelete] Delete response =>", {
+      delData,
+      delError,
+    });
+  }
 
   if (delError) {
     console.error("[handleDelete] Erro ao excluir:", delError);
     return;
   }
 
-  // 3) Checar depois do DELETE se a linha sumiu
-  const { data: checkAfter, error: errorAfter } = await supabase
-    .from("todos")
-    .select("*")
-    .eq("id", id);
-
-  console.log("[handleDelete] Check AFTER delete =>", {
-    checkAfter,
-    errorAfter,
-  });
-
-  if (errorAfter) {
-    console.error("[handleDelete] Erro ao checar depois de excluir:", errorAfter);
-    return;
-  }
-  if (!checkAfter || checkAfter.length === 0) {
-    console.log("[handleDelete] Linha ID =", id, "foi realmente removida do banco!");
-  } else {
-    console.warn("[handleDelete] Linha ID =", id, "ainda existe =>", checkAfter);
-  }
-
-  // 4) Se deu certo, atualiza o estado local
   setAllTodos(allTodos.filter((todo) => todo.id !== id));
 };
 
@@ -168,12 +121,13 @@ export const getServerSideProps = withPageAuthRequired({
     const session = await getSession(req, res);
     const supabase = await getSupabase(session.user.accessToken);
     const { data: todos } = await supabase.from('todos').select('*');
+    const namespace = process.env.NEXT_PUBLIC_AUTH0_NAMESPACE;
 
     return {
       props: {
         user: {
           ...session.user,
-          roles: session.user['gm-supabase-tutorial.us.auth0.com/roles'] || [],
+          roles: session.user[`${namespace}/roles`] || [],
           accessToken: session.user.accessToken
         },
         todos,
