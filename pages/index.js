@@ -5,14 +5,14 @@ import Link from 'next/link';
 import logger from '../utils/logger';
 
 const TodoList = ({ todos, isAdmin, onDelete }) => (
-  <div className="space-y-4">
+  <div className="todo-list">
     {todos.length > 0 ? (
       todos.map(todo => (
-        <div key={todo.id} className="flex justify-between items-center p-4 bg-gray-800 rounded-lg">
-          <span>{todo.content}</span>
+        <div key={todo.id} className="todo-item">
+          <span className="todo-content">{todo.content}</span>
           {isAdmin && (
             <button
-              className="text-red-400 hover:text-red-300"
+              className="todo-delete-button"
               onClick={() => onDelete(todo.id)}
             >
               Excluir
@@ -21,7 +21,7 @@ const TodoList = ({ todos, isAdmin, onDelete }) => (
         </div>
       ))
     ) : (
-      <p className="text-gray-400 text-center">Você completou todas as tarefas!</p>
+      <p className="todo-empty-message">Você completou todas as tarefas!</p>
     )}
   </div>
 );
@@ -36,15 +36,15 @@ const TodoForm = ({ onSubmit }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
+    <form onSubmit={handleSubmit} className="todo-form">
       <input
         type="text"
         onChange={(e) => setContent(e.target.value)}
         value={content}
         placeholder="Adicione uma nova tarefa..."
-        className="flex-1 p-2 border rounded bg-gray-800 text-white"
+        className="todo-input"
       />
-      <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+      <button type="submit" className="todo-button">
         Adicionar
       </button>
     </form>
@@ -98,16 +98,19 @@ const Index = ({ user, todos }) => {
   };
 
   return (
-    <div className="container mx-auto p-8 min-h-screen flex flex-col items-center justify-center text-white">
-      <div className="w-full max-w-2xl space-y-6">
-        <p className="text-lg flex items-center justify-between">
-          <span>
-            Bem-vindo {user.name}! ({isAdmin ? 'Admin' : 'Usuário'})
-          </span>
-          <Link href="/api/auth/logout" className="text-blue-400 underline ml-2">
+    <div className="main-container">
+      <div className="content-wrapper">
+        <div className="header">
+          <div className="user-info">
+            <span>Bem-vindo {user.name}!</span>
+            <span className={`role-badge ${isAdmin ? 'role-badge-admin' : 'role-badge-user'}`}>
+              {isAdmin ? 'Admin' : 'Usuário'}
+            </span>
+          </div>
+          <Link href="/api/auth/logout" className="logout-link">
             Sair
           </Link>
-        </p>
+        </div>
 
         <TodoForm onSubmit={handleAddTodo} />
         <TodoList todos={allTodos} isAdmin={isAdmin} onDelete={handleDelete} />

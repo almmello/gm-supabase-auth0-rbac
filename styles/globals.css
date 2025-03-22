@@ -2,16 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@layer components {
+  /* Container Principal */
+  .main-container {
+    @apply container mx-auto p-8 min-h-screen flex flex-col items-center justify-center text-white;
+  }
+
+  .content-wrapper {
+    @apply w-full max-w-2xl space-y-6;
+  }
+
+  /* Header */
+  .header {
+    @apply text-lg flex items-center justify-between;
+  }
+
+  .user-info {
+    @apply flex items-center gap-2;
+  }
+
+  .logout-link {
+    @apply text-blue-400 hover:text-blue-300 underline ml-2 transition-colors;
+  }
+
+  /* Formulário */
+  .todo-form {
+    @apply flex gap-2;
+  }
+
+  .todo-input {
+    @apply flex-1 p-2 border rounded bg-gray-800 text-white 
+           focus:outline-none focus:ring-2 focus:ring-blue-500 
+           placeholder-gray-400;
+  }
+
+  .todo-button {
+    @apply px-4 py-2 bg-blue-600 text-white rounded-lg
+           hover:bg-blue-700 transition-colors
+           focus:outline-none focus:ring-2 focus:ring-blue-500;
+  }
+
+  /* Lista de Tarefas */
+  .todo-list {
+    @apply space-y-4;
+  }
+
+  .todo-item {
+    @apply flex justify-between items-center p-4 bg-gray-800 rounded-lg
+           hover:bg-gray-700 transition-colors;
+  }
+
+  .todo-content {
+    @apply text-gray-100;
+  }
+
+  .todo-actions {
+    @apply flex gap-2;
+  }
+
+  .todo-edit-button {
+    @apply text-blue-400 hover:text-blue-300 transition-colors;
+  }
+
+  .todo-delete-button {
+    @apply text-red-400 hover:text-red-300 transition-colors;
+  }
+
+  .todo-empty-message {
+    @apply text-gray-400 text-center py-8;
+  }
+
+  /* Badges */
+  .role-badge {
+    @apply px-2 py-1 text-xs rounded-full;
+  }
+
+  .role-badge-admin {
+    @apply bg-purple-600 text-white;
+  }
+
+  .role-badge-user {
+    @apply bg-blue-600 text-white;
+  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
 
 body {
