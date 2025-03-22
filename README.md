@@ -483,7 +483,6 @@ export default Index;
 2. **Faça login como usuário Comum** e verifique que o botão "Excluir" não aparece, confirmando o funcionamento correto das regras RLS no Supabase.
 3. Teste as operações (listar, adicionar, editar, excluir) com ambos usuários para validar as políticas de segurança e a interface.
 
-Essas instruções encerram a configuração básica para validação das roles no frontend. Caso precise de ajustes ou validações adicionais, estarei aqui para te ajudar!
 
 ## Sistema de Logs Otimizado
 
@@ -614,3 +613,127 @@ Ao adicionar novas funcionalidades, siga estas diretrizes:
 3. Adicione logs informativos para operações importantes
 4. Mantenha o formato consistente
 5. Evite logs sensíveis em produção
+
+## 4. Refatoração e Identidade Visual Goalmoon
+
+Nesta etapa, realizamos uma importante refatoração do código e implementamos a identidade visual da Goalmoon, tornando a aplicação mais profissional e manutenível.
+
+### 4.1 Componentização e Hooks Customizados
+
+Reorganizamos a estrutura do projeto separando as responsabilidades em componentes e hooks específicos:
+
+#### `components/todos/TodoForm.js`
+```jsx
+// Componente responsável pelo formulário de adição de tarefas
+// Benefícios:
+// - Isolamento da lógica de formulário
+// - Reutilização em diferentes contextos
+// - Manutenção simplificada
+```
+
+#### `components/todos/TodoList.js`
+```jsx
+// Componente para exibição e gerenciamento da lista de tarefas
+// Benefícios:
+// - Separação clara da lógica de listagem
+// - Melhor organização do código
+// - Facilita implementação de novas features
+```
+
+#### `hooks/useTodos.js`
+```jsx
+// Hook customizado para gerenciamento de estado e operações CRUD
+// Benefícios:
+// - Centralização da lógica de negócio
+// - Reutilização de código
+// - Melhor testabilidade
+// - Separação clara entre UI e lógica
+```
+
+### 4.2 Identidade Visual Goalmoon
+
+Implementamos o design system da Goalmoon, criando uma experiência visual consistente e profissional:
+
+#### Paleta de Cores
+```css
+:root {
+  --color-deep-navy: #374161;    /* Fundo principal */
+  --color-dark-slate: #293047;   /* Fundo secundário */
+  --color-blue-light: #6374AD;   /* Elementos interativos */
+  --color-blue-lighter: #879FED; /* Destaques */
+  --color-mint: #71b399;         /* Ações positivas */
+}
+```
+
+#### Componentes Estilizados
+- **Header**: Design moderno com logo proeminente
+- **Formulários**: Campos com bordas suaves e feedback visual
+- **Botões**: Estados hover e transições suaves
+- **Cards**: Elevação sutil com sombras
+- **Loading**: Spinner animado personalizado
+
+### 4.3 Benefícios da Nova Estrutura
+
+1. **Manutenibilidade**
+   - Código mais organizado e modular
+   - Facilidade para encontrar e corrigir bugs
+   - Simplicidade para adicionar novas funcionalidades
+
+2. **Performance**
+   - Componentes otimizados
+   - Menos re-renders desnecessários
+   - Melhor gerenciamento de estado
+
+3. **Experiência do Usuário**
+   - Interface mais profissional
+   - Feedback visual mais claro
+   - Navegação mais intuitiva
+
+4. **Desenvolvimento**
+   - Código mais limpo e legível
+   - Facilidade para trabalho em equipe
+   - Melhor organização do projeto
+
+### 4.4 Como Implementar
+
+1. **Crie os Novos Componentes**
+```bash
+mkdir -p components/todos
+touch components/todos/TodoForm.js
+touch components/todos/TodoList.js
+mkdir hooks
+touch hooks/useTodos.js
+```
+
+2. **Implemente o Hook useTodos**
+```javascript
+// hooks/useTodos.js
+export const useTodos = () => {
+  // Implementação das operações CRUD
+  // Gerenciamento de estado
+  // Tratamento de erros
+};
+```
+
+3. **Desenvolva os Componentes**
+```javascript
+// components/todos/TodoForm.js
+// components/todos/TodoList.js
+// Implemente a UI seguindo o design system
+```
+
+4. **Aplique os Estilos**
+```css
+/* styles/globals.css */
+/* Adicione as variáveis de cores e estilos base */
+```
+
+### 4.5 Próximos Passos
+
+- [ ] Implementar testes unitários para os novos componentes
+- [ ] Adicionar documentação detalhada dos componentes
+- [ ] Criar storybook para visualização dos componentes
+- [ ] Implementar mais animações e transições
+
+Esta nova estrutura não apenas melhora a qualidade do código, mas também estabelece uma base sólida para o crescimento futuro da aplicação, mantendo a consistência visual da marca Goalmoon.
+

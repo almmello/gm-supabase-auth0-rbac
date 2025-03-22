@@ -1,98 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    /* Cores Primárias */
+    --color-deep-navy: #374161;
+    --color-dark-slate: #293047;
+    --color-blue-light: #6374AD;
+    --color-blue-lighter: #879FED;
+    --color-blue-gray: #3F4A6E;
+    
+    /* Cores Secundárias */
+    --color-mint: #71b399;
+    --color-gray-light: #dbe2ea;
+    --color-gray-lighter: #eaf0f5;
+    --color-cream: #E6E0D3;
+    --color-cream-light: #E2DBCD;
+    
+    /* Cores Terrosas */
+    --color-burgundy: #562632;
+    --color-brown: #856968;
+    --color-cream-dark: #FCF7E4;
+    --color-dark-brown: #29212C;
+    --color-navy: #192639;
+    
+    /* Cores de Texto */
+    --color-text-primary: #293047;
+    --color-text-secondary: #374161;
+    --color-text-light: #dbe2ea;
+  }
+
+  body {
+    @apply bg-[#293047] text-[#eaf0f5] font-['Montserrat'];
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-['Montserrat'] font-bold;
+  }
+}
+
 @layer components {
   /* Container Principal */
   .main-container {
-    @apply container mx-auto p-8 min-h-screen flex flex-col items-center justify-center text-white;
+    @apply min-h-screen bg-[#293047] py-8 px-4;
   }
 
   .content-wrapper {
-    @apply w-full max-w-2xl space-y-6;
+    @apply max-w-3xl mx-auto space-y-6;
   }
 
   /* Header */
+  .header-container {
+    @apply space-y-6;
+  }
+
+  .logo-container {
+    @apply flex justify-start mb-6 px-2;
+  }
+
   .header {
-    @apply text-lg flex items-center justify-between;
+    @apply flex items-center justify-between bg-[#374161] rounded-2xl p-5
+           border border-[#3F4A6E]/30 shadow-md;
   }
 
   .user-info {
-    @apply flex items-center gap-2;
+    @apply flex items-center gap-3;
+  }
+
+  .user-name {
+    @apply text-[#eaf0f5] font-semibold text-sm;
   }
 
   .logout-link {
-    @apply text-blue-400 hover:text-blue-300 underline ml-2 transition-colors;
+    @apply bg-[#879FED] text-[#293047] hover:bg-[#6374AD] hover:text-white 
+           transition-colors duration-200 text-sm font-semibold 
+           px-5 py-2 rounded-full shadow-sm hover:shadow-md;
   }
 
   /* Formulário */
   .todo-form {
-    @apply flex gap-2;
+    @apply bg-[#374161] rounded-2xl p-5 
+           border border-[#3F4A6E]/30 shadow-md;
+  }
+
+  .todo-input-wrapper {
+    @apply flex gap-3;
   }
 
   .todo-input {
-    @apply flex-1 p-2 border rounded bg-gray-800 text-white 
-           focus:outline-none focus:ring-2 focus:ring-blue-500 
-           placeholder-gray-400;
+    @apply flex-1 bg-[#3F4A6E] rounded-full px-5 py-2.5
+           text-[#eaf0f5] placeholder-[#6374AD] text-sm
+           border-2 border-[#6374AD]/20
+           focus:outline-none focus:border-[#71b399]
+           transition-all duration-200;
   }
 
   .todo-button {
-    @apply px-4 py-2 bg-blue-600 text-white rounded-lg
-           hover:bg-blue-700 transition-colors
-           focus:outline-none focus:ring-2 focus:ring-blue-500;
+    @apply bg-[#71b399] text-[#293047] hover:bg-[#879FED] hover:text-[#293047]
+           transition-colors duration-200 text-sm font-semibold
+           px-6 py-2.5 rounded-full shadow-sm hover:shadow-md;
   }
 
   /* Lista de Tarefas */
   .todo-list {
-    @apply space-y-4;
+    @apply space-y-3;
   }
 
   .todo-item {
-    @apply flex justify-between items-center p-4 bg-gray-800 rounded-lg
-           hover:bg-gray-700 transition-colors;
+    @apply bg-[#374161] rounded-2xl p-5
+           border border-[#3F4A6E]/30 shadow-md
+           hover:border-[#6374AD]/50 transition-all duration-200;
   }
 
   .todo-content {
-    @apply text-gray-100;
+    @apply text-[#eaf0f5] text-sm font-medium flex-1;
   }
 
   .todo-actions {
-    @apply flex gap-2;
+    @apply flex items-center gap-3;
   }
 
   .todo-edit-button {
-    @apply text-blue-400 hover:text-blue-300 transition-colors;
+    @apply bg-[#879FED] text-[#293047] hover:bg-[#6374AD] hover:text-white
+           transition-colors duration-200 text-sm font-semibold
+           px-5 py-2 rounded-full shadow-sm hover:shadow-md;
   }
 
   .todo-delete-button {
-    @apply text-red-400 hover:text-red-300 transition-colors;
+    @apply bg-[#E2DBCD] text-[#562632] hover:bg-[#562632] hover:text-white
+           transition-colors duration-200 text-sm font-semibold
+           px-5 py-2 rounded-full shadow-sm hover:shadow-md;
   }
 
   .todo-empty-message {
-    @apply text-gray-400 text-center py-8;
+    @apply text-center py-8 text-[#6374AD] text-sm font-medium italic;
   }
 
   /* Badges */
   .role-badge {
-    @apply px-2 py-1 text-xs rounded-full;
+    @apply px-4 py-1.5 rounded-full text-xs font-semibold shadow-sm;
   }
 
   .role-badge-admin {
-    @apply bg-purple-600 text-white;
+    @apply bg-[#71b399] text-[#293047];
   }
 
   .role-badge-user {
-    @apply bg-blue-600 text-white;
+    @apply bg-[#879FED] text-[#293047];
   }
-}
 
-:root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Loading */
+  .loading-spinner {
+    @apply animate-spin rounded-full border-4 border-[#3F4A6E]
+           border-t-[#71b399] h-8 w-8;
+  }
 }

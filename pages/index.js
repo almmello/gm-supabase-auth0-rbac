@@ -1,168 +1,168 @@
-import { useState } from 'react';
+import { useUser } from '@auth0/nextjs-auth0/client';
+import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
 import { withPageAuthRequired, getSession } from '@auth0/nextjs-auth0';
-import { getSupabase } from '../utils/supabase';
-import Link from 'next/link';
-import logger from '../utils/logger';
+import Image from 'next/image';
+import TodoList from '../components/todos/TodoList';
+import TodoForm from '../components/todos/TodoForm';
+import { useFetchTodos, useAddTodo, useEditTodo, useDeleteTodo } from '../hooks/useTodos';
 
-const TodoList = ({ todos, isAdmin, onDelete }) => (
-  <div className="todo-list">
-    {todos.length > 0 ? (
-      todos.map(todo => (
-        <div key={todo.id} className="todo-item">
-          <span className="todo-content">{todo.content}</span>
-          {isAdmin && (
-            <button
-              className="todo-delete-button"
-              onClick={() => onDelete(todo.id)}
-            >
-              Excluir
-            </button>
-          )}
-        </div>
-      ))
-    ) : (
-      <p className="todo-empty-message">Você completou todas as tarefas!</p>
-    )}
-  </div>
-);
+function Home({ user: serverUser }) {
+  const { user, error: authError, isLoading: authLoading } = useUser();
+  const router = useRouter();
+  const [todos, setTodos] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-const TodoForm = ({ onSubmit }) => {
-  const [content, setContent] = useState('');
+  const { fetchTodos } = useFetchTodos();
+  const { addTodo } = useAddTodo();
+  const { editTodo } = useEditTodo();
+  const { deleteTodo } = useDeleteTodo();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(content);
-    setContent('');
-  };
+  useEffect(() => {
+    const loadTodos = async () => {
+      try {
+        const data = await fetchTodos();
+        setTodos(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  return (
-    <form onSubmit={handleSubmit} className="todo-form">
-      <input
-        type="text"
-        onChange={(e) => setContent(e.target.value)}
-        value={content}
-        placeholder="Adicione uma nova tarefa..."
-        className="todo-input"
-      />
-      <button type="submit" className="todo-button">
-        Adicionar
-      </button>
-    </form>
-  );
-};
-
-const Index = ({ user, todos }) => {
-  const [allTodos, setAllTodos] = useState(todos || []);
-  const isAdmin = user.roles.includes('admin');
-
-  const getSupabaseClient = async () => {
-    return await getSupabase(user.accessToken);
-  };
+    if (user) {
+      loadTodos();
+    }
+  }, [user, fetchTodos]);
 
   const handleAddTodo = async (content) => {
-    const supabase = await getSupabaseClient();
-    
-    logger.apiCall('Supabase', 'insert', { table: 'todos', content });
-    
-    const { data, error } = await supabase
-      .from('todos')
-      .insert({ content, user_id: user.sub })
-      .select();
-
-    if (!error && data) {
-      setAllTodos([...allTodos, data[0]]);
-      logger.info('Tarefa adicionada com sucesso');
-    } else {
-      logger.error('Erro ao adicionar tarefa', error);
+    try {
+      const newTodo = await addTodo(content);
+      setTodos([...todos, newTodo]);
+    } catch (err) {
+      setError(err.message);
     }
   };
 
-  const handleDelete = async (id) => {
-    const supabase = await getSupabaseClient();
-
-    logger.apiCall('Supabase', 'delete', { table: 'todos', id });
-
-    const { data: delData, error: delError } = await supabase
-      .from("todos")
-      .delete()
-      .eq("id", id)
-      .select("*");
-
-    if (delError) {
-      logger.error('Erro ao excluir tarefa', delError);
-      return;
+  const handleEditTodo = async (id, content) => {
+    try {
+      const updatedTodo = await editTodo(id, content);
+      setTodos(todos.map(todo => 
+        todo.id === id ? updatedTodo : todo
+      ));
+    } catch (err) {
+      setError(err.message);
     }
-
-    logger.info('Tarefa excluída com sucesso');
-    setAllTodos(allTodos.filter((todo) => todo.id !== id));
   };
+
+  const handleDeleteTodo = async (id) => {
+    try {
+      await deleteTodo(id);
+      setTodos(todos.filter(todo => todo.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  if (authLoading) {
+    return (
+      <div className="main-container">
+        <div className="content-wrapper">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="loading-spinner"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (authError) {
+    return (
+      <div className="main-container">
+        <div className="content-wrapper">
+          <div className="bg-[#374161] rounded-xl p-6 text-center text-[#562632]">
+            Erro ao carregar usuário: {authError.message}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="main-container">
+        <div className="content-wrapper">
+          <div className="bg-[#374161] rounded-xl p-6 text-center text-[#856968]">
+            Por favor, faça login para continuar.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const currentUser = user || serverUser;
 
   return (
     <div className="main-container">
       <div className="content-wrapper">
-        <div className="header">
-          <div className="user-info">
-            <span>Bem-vindo {user.name}!</span>
-            <span className={`role-badge ${isAdmin ? 'role-badge-admin' : 'role-badge-user'}`}>
-              {isAdmin ? 'Admin' : 'Usuário'}
-            </span>
+        <div className="header-container">
+          <div className="logo-container">
+            <Image
+              src="/logo.png"
+              alt="Goalmoon Logo"
+              width={192}
+              height={192}
+              className="object-contain"
+              priority
+            />
           </div>
-          <Link href="/api/auth/logout" className="logout-link">
-            Sair
-          </Link>
+          <header className="header">
+            <div className="user-info">
+              <span className="user-name">{currentUser.name}</span>
+              <span className={`role-badge ${currentUser.role === 'admin' ? 'role-badge-admin' : 'role-badge-user'}`}>
+                {currentUser.role === 'admin' ? 'Admin' : 'Usuário'}
+              </span>
+            </div>
+            <a href="/api/auth/logout" className="logout-link">
+              Sair
+            </a>
+          </header>
         </div>
 
         <TodoForm onSubmit={handleAddTodo} />
-        <TodoList todos={allTodos} isAdmin={isAdmin} onDelete={handleDelete} />
+        
+        {error && (
+          <div className="bg-[#374161] rounded-2xl p-4 text-center text-[#562632] border border-[#3F4A6E]/30">
+            {error}
+          </div>
+        )}
+
+        {isLoading ? (
+          <div className="flex items-center justify-center min-h-[40vh]">
+            <div className="loading-spinner"></div>
+          </div>
+        ) : (
+          <TodoList
+            todos={todos}
+            onEdit={handleEditTodo}
+            onDelete={handleDeleteTodo}
+          />
+        )}
       </div>
     </div>
   );
-};
+}
 
 export const getServerSideProps = withPageAuthRequired({
   async getServerSideProps({ req, res }) {
-    try {
-      const session = await getSession(req, res);
-      const supabase = await getSupabase(session.user.accessToken);
-      
-      logger.apiCall('Supabase', 'select', { table: 'todos' });
-      
-      const { data: todos, error } = await supabase.from('todos').select('*');
-      
-      if (error) {
-        logger.error('Erro ao buscar tarefas', error);
-        return {
-          props: {
-            user: {
-              ...session.user,
-              roles: session.user[`${process.env.NEXT_PUBLIC_AUTH0_NAMESPACE}/roles`] || [],
-              accessToken: session.user.accessToken
-            },
-            todos: [],
-          }
-        };
+    const session = await getSession(req, res);
+    return {
+      props: {
+        user: session?.user || null
       }
-
-      return {
-        props: {
-          user: {
-            ...session.user,
-            roles: session.user[`${process.env.NEXT_PUBLIC_AUTH0_NAMESPACE}/roles`] || [],
-            accessToken: session.user.accessToken
-          },
-          todos,
-        }
-      };
-    } catch (error) {
-      logger.error('Erro ao carregar dados da página', error);
-      return {
-        props: {
-          user: null,
-          todos: [],
-        }
-      };
-    }
-  },
+    };
+  }
 });
 
-export default Index;
+export default Home;
