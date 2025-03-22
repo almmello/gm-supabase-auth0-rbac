@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { withPageAuthRequired, getSession } from '@auth0/nextjs-auth0';
 import { getSupabase } from '../utils/supabase';
 import Link from 'next/link';
+import logger from '../utils/logger';
 
 const TodoList = ({ todos, isAdmin, onDelete }) => (
   <div className="space-y-4">
@@ -61,6 +62,8 @@ const Index = ({ user, todos }) => {
   const handleAddTodo = async (content) => {
     const supabase = await getSupabaseClient();
     
+    logger.apiCall('Supabase', 'insert', { table: 'todos', content });
+    
     const { data, error } = await supabase
       .from('todos')
       .insert({ content, user_id: user.sub })
@@ -68,34 +71,31 @@ const Index = ({ user, todos }) => {
 
     if (!error && data) {
       setAllTodos([...allTodos, data[0]]);
+      logger.info('Tarefa adicionada com sucesso');
     } else {
-      console.error('Erro ao adicionar tarefa:', error);
+      logger.error('Erro ao adicionar tarefa', error);
     }
   };
 
-const handleDelete = async (id) => {
-  const supabase = await getSupabaseClient();
+  const handleDelete = async (id) => {
+    const supabase = await getSupabaseClient();
 
-  const { data: delData, error: delError } = await supabase
-    .from("todos")
-    .delete()
-    .eq("id", id)
-    .select("*");
+    logger.apiCall('Supabase', 'delete', { table: 'todos', id });
 
-  if (process.env.NEXT_PUBLIC_DEBUG_MODE === 'true') {
-    console.log("[handleDelete] Delete response =>", {
-      delData,
-      delError,
-    });
-  }
+    const { data: delData, error: delError } = await supabase
+      .from("todos")
+      .delete()
+      .eq("id", id)
+      .select("*");
 
-  if (delError) {
-    console.error("[handleDelete] Erro ao excluir:", delError);
-    return;
-  }
+    if (delError) {
+      logger.error('Erro ao excluir tarefa', delError);
+      return;
+    }
 
-  setAllTodos(allTodos.filter((todo) => todo.id !== id));
-};
+    logger.info('Tarefa excluída com sucesso');
+    setAllTodos(allTodos.filter((todo) => todo.id !== id));
+  };
 
   return (
     <div className="container mx-auto p-8 min-h-screen flex flex-col items-center justify-center text-white">
@@ -118,21 +118,47 @@ const handleDelete = async (id) => {
 
 export const getServerSideProps = withPageAuthRequired({
   async getServerSideProps({ req, res }) {
-    const session = await getSession(req, res);
-    const supabase = await getSupabase(session.user.accessToken);
-    const { data: todos } = await supabase.from('todos').select('*');
-    const namespace = process.env.NEXT_PUBLIC_AUTH0_NAMESPACE;
-
-    return {
-      props: {
-        user: {
-          ...session.user,
-          roles: session.user[`${namespace}/roles`] || [],
-          accessToken: session.user.accessToken
-        },
-        todos,
+    try {
+      const session = await getSession(req, res);
+      const supabase = await getSupabase(session.user.accessToken);
+      
+      logger.apiCall('Supabase', 'select', { table: 'todos' });
+      
+      const { data: todos, error } = await supabase.from('todos').select('*');
+      
+      if (error) {
+        logger.error('Erro ao buscar tarefas', error);
+        return {
+          props: {
+            user: {
+              ...session.user,
+              roles: session.user[`${process.env.NEXT_PUBLIC_AUTH0_NAMESPACE}/roles`] || [],
+              accessToken: session.user.accessToken
+            },
+            todos: [],
+          }
+        };
       }
-    };
+
+      return {
+        props: {
+          user: {
+            ...session.user,
+            roles: session.user[`${process.env.NEXT_PUBLIC_AUTH0_NAMESPACE}/roles`] || [],
+            accessToken: session.user.accessToken
+          },
+          todos,
+        }
+      };
+    } catch (error) {
+      logger.error('Erro ao carregar dados da página', error);
+      return {
+        props: {
+          user: null,
+          todos: [],
+        }
+      };
+    }
   },
 });
 

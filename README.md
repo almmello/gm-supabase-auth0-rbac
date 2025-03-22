@@ -484,3 +484,133 @@ export default Index;
 3. Teste as operações (listar, adicionar, editar, excluir) com ambos usuários para validar as políticas de segurança e a interface.
 
 Essas instruções encerram a configuração básica para validação das roles no frontend. Caso precise de ajustes ou validações adicionais, estarei aqui para te ajudar!
+
+## Sistema de Logs Otimizado
+
+O projeto implementa um sistema de logs otimizado focado em monitoramento de erros e chamadas de API. Este sistema foi desenvolvido para fornecer visibilidade sobre o funcionamento da aplicação sem impactar o desempenho.
+
+### Características Principais
+
+1. **Foco em Logs Críticos**
+   - Erros de API e operações
+   - Chamadas de API ao Supabase
+   - Erros de autenticação e autorização
+   - Operações de banco de dados
+
+2. **Prevenção de Duplicação**
+   - Sistema de debounce (5 segundos) para evitar logs repetidos
+   - Limite máximo de logs armazenados (100)
+   - Limpeza automática de logs antigos
+   - Cache de logs processados
+
+3. **Diferenciação de Ambientes**
+   - **Desenvolvimento**: Logs detalhados incluindo chamadas de API
+   - **Produção**: Foco em erros críticos e informações essenciais
+   - Configuração via variáveis de ambiente
+
+4. **Formato Padronizado**
+   ```javascript
+   [ERROR] Mensagem de erro
+   [WARN]  Aviso
+   [INFO]  Informação
+   [API]   Serviço - Método { parâmetros }
+   ```
+
+5. **Limpeza Automática**
+   - Limpa logs ao fechar a página (browser)
+   - Limpa logs ao recarregar o módulo (desenvolvimento)
+   - Gerenciamento automático de memória
+
+### Exemplo de Uso
+
+```javascript
+import logger from '../utils/logger';
+
+// Log de chamada de API
+logger.apiCall('Supabase', 'select', { table: 'todos' });
+
+// Log de sucesso
+logger.info('Tarefa adicionada com sucesso');
+
+// Log de erro com detalhes
+logger.error('Erro ao adicionar tarefa', error);
+
+// Log de aviso
+logger.warn('Tentativa de acesso não autorizado');
+```
+
+### Vantagens
+
+1. **Performance**
+   - Evita sobrecarga de logs
+   - Reduz uso de memória
+   - Otimizado para produção
+
+2. **Depuração**
+   - Facilita identificação de problemas
+   - Fornece contexto relevante
+   - Formato consistente e legível
+
+3. **Manutenção**
+   - Código limpo e organizado
+   - Fácil de estender
+   - Centralizado em um único módulo
+
+4. **Segurança**
+   - Evita exposição de dados sensíveis
+   - Diferenciação de ambientes
+   - Controle de informações logadas
+
+### Boas Práticas
+
+1. **Uso em APIs**
+   ```javascript
+   try {
+     logger.apiCall('Supabase', 'insert', { table: 'todos' });
+     const { data, error } = await supabase.from('todos').insert(...);
+     if (error) throw error;
+     logger.info('Operação realizada com sucesso');
+   } catch (error) {
+     logger.error('Erro na operação', error);
+     throw error;
+   }
+   ```
+
+2. **Tratamento de Erros**
+   ```javascript
+   if (error) {
+     logger.error('Erro ao processar requisição', {
+       name: error.name,
+       message: error.message,
+       stack: error.stack
+     });
+     return;
+   }
+   ```
+
+3. **Logs de API**
+   ```javascript
+   logger.apiCall('Supabase', 'select', {
+     table: 'todos',
+     filters: { user_id: userId }
+   });
+   ```
+
+### Configuração
+
+O sistema de logs pode ser configurado através de variáveis de ambiente:
+
+```env
+NODE_ENV=development  # Habilita logs detalhados
+NODE_ENV=production  # Foca em logs críticos
+```
+
+### Contribuindo
+
+Ao adicionar novas funcionalidades, siga estas diretrizes:
+
+1. Use `logger.apiCall()` para todas as chamadas de API
+2. Registre erros com `logger.error()`
+3. Adicione logs informativos para operações importantes
+4. Mantenha o formato consistente
+5. Evite logs sensíveis em produção

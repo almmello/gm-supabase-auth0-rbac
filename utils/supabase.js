@@ -1,8 +1,10 @@
 // utils/supabase.js
 import { createClient } from '@supabase/supabase-js';
+import logger from './logger';
 
 export function getSupabase(accessToken) {
-  // Retorna o objeto SupabaseClient diretamente
+  logger.apiCall('Supabase', 'createClient', { url: process.env.NEXT_PUBLIC_SUPABASE_URL });
+  
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
