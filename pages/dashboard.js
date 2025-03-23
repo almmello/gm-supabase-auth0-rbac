@@ -12,7 +12,7 @@ function Dashboard({ user: serverUser }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="loading-container">
         <div className="loading-spinner" />
       </div>
     );
@@ -20,7 +20,7 @@ function Dashboard({ user: serverUser }) {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-burgundy">
+      <div className="error-container">
         {error}
       </div>
     );
@@ -65,7 +65,7 @@ function Dashboard({ user: serverUser }) {
           <TodoForm onSubmit={addTodo} />
           
           {error && (
-            <div className="bg-burgundy/20 border border-burgundy/30 rounded-2xl p-4 text-burgundy">
+            <div className="error-message">
               {error}
             </div>
           )}

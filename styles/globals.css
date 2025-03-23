@@ -99,6 +99,20 @@
     @apply min-h-screen bg-gradient-to-b from-[#293047] to-[#374161];
   }
 
+  /* Loading e Error States */
+  .loading-container {
+    @apply flex items-center justify-center min-h-screen;
+  }
+
+  .error-container {
+    @apply flex items-center justify-center min-h-screen text-burgundy;
+  }
+
+  .error-message {
+    @apply bg-burgundy/20 border border-burgundy/30 rounded-2xl p-4 text-burgundy;
+  }
+
+  /* Header */
   .dashboard-header {
     @apply bg-gradient-to-r from-[#374161] to-[#3F4A6E]
            border-b border-[#6374AD]/20 mb-12
