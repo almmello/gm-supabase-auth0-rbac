@@ -1,104 +1,84 @@
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
-import { withPageAuthRequired, getSession } from '@auth0/nextjs-auth0';
-import Image from 'next/image';
-import TodoList from '../components/todos/TodoList';
-import TodoForm from '../components/todos/TodoForm';
-import { useTodos } from '../hooks/useTodos';
+import { useEffect } from 'react';
+import PublicLayout from '../components/layouts/PublicLayout';
 
-function Home({ user: serverUser }) {
-  const { user, error: authError, isLoading: authLoading } = useUser();
+export default function Home() {
+  const { user, isLoading } = useUser();
   const router = useRouter();
-  const { todos, loading, error, addTodo, editTodo, deleteTodo } = useTodos();
 
-  if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen py-2">
-        <a
-          href="/api/auth/login"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Login
-        </a>
-      </div>
-    );
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading) {
+    return <div>Carregando...</div>;
   }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-red-500">
-        {error}
-      </div>
-    );
-  }
-
-  const currentUser = user || serverUser;
-  const isAdmin = currentUser['gm-supabase-tutorial.us.auth0.com/roles']?.includes('admin');
 
   return (
-    <div className="main-container">
-      <div className="content-wrapper">
-        <div className="header-container">
-          <div className="logo-container">
-            <Image
-              src="/logo.png"
-              alt="Goalmoon Logo"
-              width={192}
-              height={192}
-              className="object-contain"
-              priority
-            />
+    <PublicLayout>
+      <div className="bg-white">
+        <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+              <span className="block">Goalmoon Todo</span>
+              <span className="block text-blue-600">Organize suas tarefas</span>
+            </h1>
+            <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+              Uma aplicação web moderna e responsiva para gerenciamento de tarefas, 
+              construída com as tecnologias mais recentes do mercado.
+            </p>
           </div>
-          <header className="header">
-            <div className="user-info">
-              <span className="user-name">{currentUser.name}</span>
-              <span className={`role-badge ${isAdmin ? 'role-badge-admin' : 'role-badge-user'}`}>
-                {isAdmin ? 'Admin' : 'Usuário'}
-              </span>
+
+          <div className="mt-10">
+            <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Next.js */}
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-6">
+                  <h3 className="text-lg font-medium text-gray-900">Next.js</h3>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Framework React moderno que oferece renderização híbrida, 
+                    otimização automática e excelente performance.
+                  </p>
+                </div>
+              </div>
+
+              {/* Supabase */}
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-6">
+                  <h3 className="text-lg font-medium text-gray-900">Supabase</h3>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Backend-as-a-Service que fornece banco de dados PostgreSQL, 
+                    autenticação e APIs em tempo real.
+                  </p>
+                </div>
+              </div>
+
+              {/* Auth0 */}
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-6">
+                  <h3 className="text-lg font-medium text-gray-900">Auth0</h3>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Plataforma de autenticação e autorização que garante 
+                    segurança e controle de acesso robusto.
+                  </p>
+                </div>
+              </div>
             </div>
-            <a href="/api/auth/logout" className="logout-link">
-              Sair
-            </a>
-          </header>
-        </div>
-
-        <TodoForm onSubmit={addTodo} />
-        
-        {error && (
-          <div className="bg-[#374161] rounded-2xl p-4 text-center text-[#562632] border border-[#3F4A6E]/30">
-            {error}
           </div>
-        )}
 
-        <TodoList
-          todos={todos}
-          onEdit={editTodo}
-          onDelete={deleteTodo}
-          isAdmin={isAdmin}
-        />
+          <div className="mt-10 text-center">
+            <a
+              href="/api/auth/login"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Começar Agora
+            </a>
+          </div>
+        </div>
       </div>
-    </div>
+    </PublicLayout>
   );
 }
-
-export const getServerSideProps = withPageAuthRequired({
-  async getServerSideProps({ req, res }) {
-    const session = await getSession(req, res);
-    return {
-      props: {
-        user: session?.user || null
-      }
-    };
-  }
-});
-
-export default Home;

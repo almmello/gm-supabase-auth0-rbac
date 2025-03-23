@@ -2,30 +2,31 @@
 
 import { handleAuth, handleCallback, handleLogin, handleLogout, handleError } from "@auth0/nextjs-auth0";
 import jwt from "jsonwebtoken";
-
-// Logger configurável
-const logger = {
-  log: (...args) => {
-    if (process.env.NEXT_PUBLIC_DEBUG_MODE === 'true') {
-      console.log('[DEBUG]', ...args);
-    }
-  }
-};
+import logger from '../../../utils/logger';
+import { getSupabase } from '../../../utils/supabase';
 
 const afterCallback = async (req, res, session) => {
   try {
     const decodedToken = jwt.decode(session.idToken);
     const namespace = process.env.NEXT_PUBLIC_AUTH0_NAMESPACE;
 
-    logger.log('JWT recebido do Auth0:', {
-      claims: decodedToken
+    logger.info('JWT recebido do Auth0:', {
+      sub: decodedToken.sub,
+      exp: new Date(decodedToken.exp * 1000).toISOString()
     });
 
     const roles = decodedToken[`${namespace}/roles`] || [];
     
+    // Definindo uma expiração mais curta para o token do Supabase
+    // para garantir que ele expire antes do token do Auth0
+    const supabaseExp = Math.min(
+      decodedToken.exp,
+      Math.floor(Date.now() / 1000) + 3600 // 1 hora
+    );
+    
     const payload = {
       sub: session.user.sub,
-      exp: Math.floor(Date.now() / 1000) + 60 * 60,
+      exp: supabaseExp,
       role: 'authenticated',
       roles: roles,
     };
@@ -34,9 +35,13 @@ const afterCallback = async (req, res, session) => {
     const supabaseToken = jwt.sign(payload, process.env.SUPABASE_SIGNING_SECRET);
     session.user.accessToken = supabaseToken;
 
+    // Adicionando informações de expiração à sessão para controle no frontend
+    session.user.tokenExp = supabaseExp;
+    session.user.auth0Exp = decodedToken.exp;
+
     return session;
   } catch (error) {
-    logger.log('Erro no afterCallback:', error);
+    logger.error('Erro no afterCallback:', error);
     throw error;
   }
 };
@@ -45,23 +50,23 @@ export default handleAuth({
   async login(req, res) {
     try {
       await handleLogin(req, res, {
-        returnTo: '/',
+        returnTo: '/dashboard',
         authorizationParams: {
           audience: process.env.AUTH0_AUDIENCE,
-          scope: 'openid profile email'
+          scope: 'openid profile email offline_access'
         }
       });
     } catch (error) {
-      logger.log('Erro no login:', error);
+      logger.error('Erro no login:', error);
       res.status(error.status || 500).end(error.message);
     }
   },
   async callback(req, res) {
     try {
-      await handleCallback(req, res, { afterCallback });
+      return await handleCallback(req, res, { afterCallback });
     } catch (error) {
-      logger.log('Erro no callback:', error);
-      res.status(error.status || 500).end(error.message);
+      logger.error('Erro no callback:', error);
+      return res.redirect('/');
     }
   },
   async logout(req, res) {
@@ -70,16 +75,17 @@ export default handleAuth({
         returnTo: '/'
       });
     } catch (error) {
-      logger.log('Erro no logout:', error);
-      res.status(error.status || 500).end(error.message);
+      logger.error('Erro no logout:', error);
+      return res.redirect('/');
     }
   },
   async error(req, res) {
     try {
+      logger.error('Erro na autenticação');
       await handleError(req, res);
     } catch (error) {
-      logger.log('Erro no handler de erro:', error);
-      res.status(error.status || 500).end(error.message);
+      logger.error('Erro no handler de erro:', error);
+      res.redirect('/');
     }
   }
 });

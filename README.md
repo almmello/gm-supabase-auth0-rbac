@@ -749,7 +749,7 @@ No arquivo `pages/api/auth/[...auth0].js`, identificamos que o payload do token 
 
 ```js
 const payload = {
-  sub: session.user.sub,  // Alterado de userId para sub
+  sub: session.user.sub,
   exp: Math.floor(Date.now() / 1000) + 60 * 60,
   role: 'authenticated',
   roles: roles,
@@ -1039,7 +1039,7 @@ Atualmente, nossa aplicação acessa o Supabase diretamente dos hooks, como most
 Esta abordagem funciona, mas apresenta alguns desafios:
 - Código duplicado nas operações CRUD
 - Dificuldade para manter consistência no tratamento de erros
-- Acoplamento entre a lógica de negócios e o acesso ao banco de dados
+- Acoplamento entre a lógica de negócio e o acesso ao banco de dados
 
 ### 7.2 Nova Arquitetura com TodoService
 
@@ -1406,4 +1406,108 @@ npm test
 - [ ] Implementar cache de dados no serviço
 - [ ] Adicionar validações de dados
 - [ ] Melhorar o tratamento de erros
+
+## Área Pública e Tratamento de Sessão
+
+### Área Pública (Landing Page)
+
+Implementamos uma área pública que serve como landing page da aplicação. Esta área é acessível para usuários não autenticados e fornece:
+
+- Design minimalista com a identidade visual da Goalmoon
+- Informações sobre as tecnologias utilizadas (Next.js, Supabase, Auth0)
+- Botão de acesso ao sistema que redireciona para a autenticação Auth0
+- Layout responsivo e moderno
+
+### Estrutura de Layouts
+
+Criamos uma hierarquia de layouts para melhor organização e reutilização de código:
+
+```javascript
+// BaseLayout - Configurações comuns para todas as páginas
+components/layouts/BaseLayout.js
+├── Meta tags
+├── Título da aplicação
+└── Preload de assets
+
+// PublicLayout - Layout específico para área pública
+components/layouts/PublicLayout.js
+├── Cabeçalho com logo
+├── Botão de login
+└── Rodapé institucional
+```
+
+### Tratamento de Tokens e Sessão
+
+Implementamos um sistema robusto para gerenciar tokens e sessões:
+
+1. **Geração de Token Supabase**:
+```javascript
+// pages/api/auth/[...auth0].js
+const supabaseExp = Math.min(
+  decodedToken.exp,
+  Math.floor(Date.now() / 1000) + 3600 // 1 hora
+);
+
+const payload = {
+  sub: session.user.sub,
+  exp: supabaseExp,
+  role: 'authenticated',
+  roles: roles,
+};
+```
+
+2. **Controle de Expiração**:
+- Token do Supabase configurado para expirar antes do token do Auth0
+- Informações de expiração armazenadas na sessão para controle no frontend
+- Redirecionamento automático para a landing page em caso de token expirado
+
+3. **Tratamento de Erros**:
+```javascript
+// hooks/useTodos.js
+if (err.message?.includes('JWT') || err.status === 401) {
+  router.push('/');
+  return;
+}
+```
+
+### Fluxo de Autenticação
+
+1. **Acesso Inicial**:
+   - Usuário acessa a landing page (`/`)
+   - Visualiza informações sobre a aplicação
+   - Clica no botão "Entrar"
+
+2. **Processo de Login**:
+   - Redirecionamento para Auth0
+   - Autenticação bem-sucedida gera token JWT
+   - Callback do Auth0 gera token Supabase
+   - Redirecionamento para dashboard
+
+3. **Expiração de Sessão**:
+   - Sistema monitora constantemente a validade dos tokens
+   - Em caso de expiração, usuário é redirecionado para landing page
+   - Mensagens de erro claras informam o status da sessão
+
+### Benefícios
+
+- **Experiência do Usuário**:
+  - Transições suaves entre estados autenticado/não autenticado
+  - Interface consistente e responsiva
+  - Feedback claro sobre o status da sessão
+
+- **Segurança**:
+  - Tokens com tempo de vida controlado
+  - Validação constante de autenticação
+  - Tratamento adequado de erros de autorização
+
+- **Manutenibilidade**:
+  - Código organizado em componentes reutilizáveis
+  - Separação clara entre área pública e privada
+  - Logs detalhados para debugging
+
+### Próximos Passos
+
+- Implementar refresh token automático
+- Adicionar mais informações institucionais na landing page
+- Melhorar feedback visual durante transições de autenticação
 
