@@ -127,76 +127,29 @@ Como fica a versão final do arquivo `pages/api/auth/[...auth0].js`:
 ```js
 // pages/api/auth/[...auth0].js
 
-import { handleAuth, handleCallback, handleLogin } from "@auth0/nextjs-auth0";
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 
-// Logger configurável
-const logger = {
-  log: (...args) => {
-    if (process.env.NEXT_PUBLIC_DEBUG_MODE === 'true') {
-      console.log('[DEBUG]', ...args);
-    }
-  }
-};
-
-const afterCallback = async (req, res, session) => {
-  const decodedToken = jwt.decode(session.idToken);
-  const namespace = process.env.NEXT_PUBLIC_AUTH0_NAMESPACE; 
-
-  logger.log('JWT recebido do Auth0:', {
-    token: session.idToken,
-    claims: decodedToken
-  });
-
-  // Adicionando log para verificar as roles
-  logger.log('ID Token Claims:', decodedToken);
-  logger.log('Namespace:', namespace);
-  logger.log('Roles from decodedToken:', decodedToken[`${namespace}/roles`]);
-  logger.log('Session user before assignment:', session.user);
-  logger.log('Decoded roles:', decodedToken[`${namespace}/roles`]);
-  logger.log('Session user after assignment:', session.user);
-  logger.log('Roles assigned to session.user:', session.user[`${namespace}/roles`]);
-  logger.log('Decoded roles after assignment:', decodedToken[`${namespace}/roles`]);
-  logger.log('Session user roles after assignment:', session.user[`${namespace}/roles`]);
-  logger.log('Namespace after assignment:', namespace);
-
-  const payload = {
-    userId: session.user.sub,
-    exp: Math.floor(Date.now() / 1000) + 60 * 60,
-    role: 'authenticated',
-    roles: decodedToken[`${namespace}/roles`] || [],
-  };
-
-  session.user[`${namespace}/roles`] = decodedToken[`${namespace}/roles`] || [];
-
-  const supabaseToken = jwt.sign(payload, process.env.SUPABASE_SIGNING_SECRET);
-
-  logger.log('Token gerado para o Supabase:', {
-    token: supabaseToken,
-    claims: jwt.decode(supabaseToken)
-  });
-
-  session.user.accessToken = supabaseToken;
-  return session;
-};
-
-export default handleAuth({
-  async login(req, res) {
-    return handleLogin(req, res, {
-      authorizationParams: {
-        audience: process.env.AUTH0_AUDIENCE,
-        scope: 'openid profile email'
-      }
+// Função para logar informações do token
+function logTokenDetails(supabaseToken) {
+  try {
+    const decoded = jwt.decode(supabaseToken);
+    
+    console.log('Token decodificado:', {
+      userId: decoded.sub,
+      roles: decoded['https://myapp.example.com/roles'],
+      expiration: new Date(decoded.exp * 1000).toLocaleString()
     });
-  },
-  async callback(req, res) {
-    try {
-      await handleCallback(req, res, { afterCallback });
-    } catch (error) {
-      res.status(error.status || 500).end(error.message);
-    }
-  },
-});
+    
+    return decoded;
+  } catch (error) {
+    console.error('Erro ao decodificar token:', error);
+    throw error;
+  }
+}
+
+// Uso no fluxo de autenticação
+const supabaseToken = session.user.accessToken;
+logTokenDetails(supabaseToken);
 ```
 
 ## 2. Atualizando as políticas de acesso via nova migração
@@ -291,27 +244,76 @@ Primeiro, vamos garantir que as roles definidas no Auth0 estejam corretamente di
 
 ```javascript
 // pages/api/auth/[...auth0].js
-import { handleAuth, handleCallback } from "@auth0/nextjs-auth0";
+import { handleAuth, handleCallback, handleLogin } from "@auth0/nextjs-auth0";
 import jwt from "jsonwebtoken";
 
-const afterCallback = async (req, res, session) => {
-  const namespace = 'https://gm-supabase-tutorial.us.auth0.com';
+// Logger configurável
+const logger = {
+  log: (...args) => {
+    if (process.env.NEXT_PUBLIC_DEBUG_MODE === 'true') {
+      console.log('[DEBUG]', ...args);
+    }
+  }
+};
 
-  session.user.roles = session.idTokenClaims[`${namespace}/roles`] || [];
+const afterCallback = async (req, res, session) => {
+  const decodedToken = jwt.decode(session.idToken);
+  const namespace = process.env.NEXT_PUBLIC_AUTH0_NAMESPACE; 
+
+  logger.log('JWT recebido do Auth0:', {
+    token: session.idToken,
+    claims: decodedToken
+  });
+
+  // Adicionando log para verificar as roles
+  logger.log('ID Token Claims:', decodedToken);
+  logger.log('Namespace:', namespace);
+  logger.log('Roles from decodedToken:', decodedToken[`${namespace}/roles`]);
+  logger.log('Session user before assignment:', session.user);
+  logger.log('Decoded roles:', decodedToken[`${namespace}/roles`]);
+  logger.log('Session user after assignment:', session.user);
+  logger.log('Roles assigned to session.user:', session.user[`${namespace}/roles`]);
+  logger.log('Decoded roles after assignment:', decodedToken[`${namespace}/roles`]);
+  logger.log('Session user roles after assignment:', session.user[`${namespace}/roles`]);
+  logger.log('Namespace after assignment:', namespace);
 
   const payload = {
     userId: session.user.sub,
     exp: Math.floor(Date.now() / 1000) + 60 * 60,
     role: 'authenticated',
-    roles: session.user.roles
+    roles: decodedToken[`${namespace}/roles`] || [],
   };
+
+  session.user[`${namespace}/roles`] = decodedToken[`${namespace}/roles`] || [];
 
   const supabaseToken = jwt.sign(payload, process.env.SUPABASE_SIGNING_SECRET);
 
-  session.user.accessToken = supabaseToken;
+  logger.log('Token gerado para o Supabase:', {
+    token: supabaseToken,
+    claims: jwt.decode(supabaseToken)
+  });
 
+  session.user.accessToken = supabaseToken;
   return session;
 };
+
+export default handleAuth({
+  async login(req, res) {
+    return handleLogin(req, res, {
+      authorizationParams: {
+        audience: process.env.AUTH0_AUDIENCE,
+        scope: 'openid profile email'
+      }
+    });
+  },
+  async callback(req, res) {
+    try {
+      await handleCallback(req, res, { afterCallback });
+    } catch (error) {
+      res.status(error.status || 500).end(error.message);
+    }
+  },
+});
 ```
 
 Desta forma, teremos acesso direto às roles na aplicação através do objeto `user.roles`.
@@ -876,7 +878,7 @@ Para aplicar estas correções, certifique-se de:
 Após identificar que usuários comuns ainda podiam ver o botão de exclusão, implementamos melhorias na interface e no tratamento de erros:
 
 1. **Ocultação Condicional do Botão de Exclusão**
-   - O botão de exclusão agora só é exibido para usuários com role 'admin'
+   - O botão de exclusão agora só é exibido para usuários Admin
    - Implementado através de renderização condicional no componente `TodoList`
 
 2. **Validação Dupla de Permissões**
@@ -926,4 +928,100 @@ Estas melhorias garantem que:
 2. Usuários recebam feedback claro sobre suas ações
 3. A segurança seja mantida tanto no frontend quanto no backend
 4. A experiência do usuário seja mais intuitiva e profissional
+
+## 6. Testes Unitários
+
+Para garantir a qualidade e confiabilidade do código, implementamos testes unitários usando Jest e React Testing Library. Os testes cobrem componentes e hooks principais da aplicação.
+
+### 6.1 Configuração
+
+O projeto utiliza as seguintes ferramentas de teste:
+- Jest: Framework de teste
+- React Testing Library: Biblioteca para testar componentes React
+- jest-environment-jsdom: Ambiente DOM para testes
+- @testing-library/user-event: Simulação de eventos do usuário
+
+Para instalar as dependências:
+```bash
+npm install --save-dev jest @testing-library/react @testing-library/jest-dom @testing-library/user-event jest-environment-jsdom
+```
+
+### 6.2 Estrutura dos Testes
+
+Os testes estão organizados no diretório `__tests__`, seguindo a mesma estrutura do código fonte:
+```
+__tests__/
+  ├── components/
+  │   └── TodoList.test.js
+  └── hooks/
+      └── useTodos.test.js
+```
+
+### 6.3 Executando os Testes
+
+Para executar os testes, use um dos seguintes comandos:
+```bash
+npm test           # Executa todos os testes uma vez
+npm test:watch    # Executa os testes em modo watch
+npm test:coverage # Executa os testes e gera relatório de cobertura
+```
+
+### 6.4 Exemplos de Testes
+
+#### Testes de Componentes (TodoList)
+- Renderização da lista vazia
+- Renderização de todos
+- Visibilidade do botão de exclusão baseada na role
+- Interações de edição e exclusão
+
+```javascript
+test('botão de exclusão só aparece para admin', () => {
+  const { rerender } = render(
+    <TodoList todos={mockTodos} onEdit={mockHandlers.onEdit} onDelete={mockHandlers.onDelete} userRole="user" />
+  );
+  expect(screen.queryAllByText('Excluir')).toHaveLength(0);
+
+  rerender(
+    <TodoList todos={mockTodos} onEdit={mockHandlers.onEdit} onDelete={mockHandlers.onDelete} userRole="admin" />
+  );
+  expect(screen.getAllByText('Excluir')).toHaveLength(2);
+});
+```
+
+#### Testes de Hooks (useTodos)
+- Busca de todos
+- Adição de novos todos
+- Edição de todos
+- Exclusão de todos
+- Tratamento de erros
+
+```javascript
+describe('useFetchTodos', () => {
+  it('busca todos corretamente', async () => {
+    const mockTodos = [
+      { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+      { id: 2, content: 'Test todo 2', user_id: 'test-user-id' },
+    ];
+
+    mockSupabase.select.mockResolvedValueOnce({ data: mockTodos, error: null });
+
+    const { result } = renderHook(() => useFetchTodos());
+
+    await act(async () => {
+      const todos = await result.current.fetchTodos();
+      expect(todos).toEqual(mockTodos);
+    });
+  });
+});
+```
+
+### 6.5 Mocks
+
+Os testes utilizam mocks para:
+- Auth0 (autenticação)
+- Supabase (banco de dados)
+- Next.js (Image, Router)
+- Funções do navegador (window.prompt, window.confirm)
+
+Isso permite testar componentes e hooks isoladamente, sem depender de serviços externos.
 

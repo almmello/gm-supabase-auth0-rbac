@@ -148,8 +148,7 @@ export const useDeleteTodo = () => {
       const { error } = await supabase
         .from('todos')
         .delete()
-        .eq('id', id)
-        .eq('user_id', user.sub);
+        .match({ id, user_id: user.sub });
 
       if (error) {
         if (error.message.includes('JWT')) {
