@@ -1,6 +1,6 @@
 // pages/api/auth/[...auth0].js
 
-import { handleAuth, handleCallback, handleLogin } from "@auth0/nextjs-auth0";
+import { handleAuth, handleCallback, handleLogin, handleLogout, handleError } from "@auth0/nextjs-auth0";
 import jwt from "jsonwebtoken";
 
 // Logger configurável
@@ -61,6 +61,24 @@ export default handleAuth({
       await handleCallback(req, res, { afterCallback });
     } catch (error) {
       logger.log('Erro no callback:', error);
+      res.status(error.status || 500).end(error.message);
+    }
+  },
+  async logout(req, res) {
+    try {
+      await handleLogout(req, res, {
+        returnTo: '/'
+      });
+    } catch (error) {
+      logger.log('Erro no logout:', error);
+      res.status(error.status || 500).end(error.message);
+    }
+  },
+  async error(req, res) {
+    try {
+      await handleError(req, res);
+    } catch (error) {
+      logger.log('Erro no handler de erro:', error);
       res.status(error.status || 500).end(error.message);
     }
   }
