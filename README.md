@@ -1025,3 +1025,385 @@ Os testes utilizam mocks para:
 
 Isso permite testar componentes e hooks isoladamente, sem depender de serviços externos.
 
+
+## 7. Implementando a Camada de Serviço
+
+Após implementar a autenticação, autorização, interface e testes, vamos dar um passo importante na evolução da nossa arquitetura: a implementação de uma camada de serviço. Esta mudança vai melhorar a organização do código e facilitar a manutenção.
+
+### 7.1 Por que uma Camada de Serviço?
+
+Atualmente, nossa aplicação acessa o Supabase diretamente dos hooks, como mostrado no diagrama:
+
+![Diagrama de Sequência Anterior](docs/sequence/sequencia-todo-20250323-01.png)
+
+Esta abordagem funciona, mas apresenta alguns desafios:
+- Código duplicado nas operações CRUD
+- Dificuldade para manter consistência no tratamento de erros
+- Acoplamento entre a lógica de negócios e o acesso ao banco de dados
+
+### 7.2 Nova Arquitetura com TodoService
+
+Vamos implementar uma camada de serviço que centraliza todas as operações CRUD:
+
+![Diagrama de Sequência Atual](docs/sequence/sequencia-todo-20250323-02.png)
+
+### 7.3 Implementação Passo a Passo
+
+1. Primeiro, crie a pasta `services` e o arquivo `todoService.js`:
+```bash
+mkdir services
+touch services/todoService.js
+```
+
+2. Implemente o `todoService.js`:
+```javascript
+import { getSupabase } from '../utils/supabase';
+import logger from '../utils/logger';
+
+export const todoService = {
+  async getTodos(accessToken, userId) {
+    try {
+      const supabase = getSupabase(accessToken);
+      const { data, error } = await supabase
+        .from('todos')
+        .select()
+        .eq('user_id', userId);
+
+      if (error) throw error;
+      if (!data) throw new Error('Nenhum dado retornado');
+      
+      return data;
+    } catch (error) {
+      logger.error('Erro ao buscar tarefas:', error);
+      throw error;
+    }
+  },
+
+  async createTodo(accessToken, userId, content) {
+    try {
+      const supabase = getSupabase(accessToken);
+      const { data, error } = await supabase
+        .from('todos')
+        .insert({ content, user_id: userId })
+        .select()
+        .single();
+
+      if (error) throw error;
+      if (!data) throw new Error('Nenhum dado retornado após criação');
+      
+      return data;
+    } catch (error) {
+      logger.error('Erro ao criar tarefa:', error);
+      throw error;
+    }
+  },
+
+  async updateTodo(accessToken, userId, id, content) {
+    try {
+      const supabase = getSupabase(accessToken);
+      const { data, error } = await supabase
+        .from('todos')
+        .update({ content })
+        .eq('id', id)
+        .eq('user_id', userId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      if (!data) throw new Error('Nenhum dado retornado após atualização');
+      
+      return data;
+    } catch (error) {
+      logger.error('Erro ao atualizar tarefa:', error);
+      throw error;
+    }
+  },
+
+  async deleteTodo(accessToken, userId, id) {
+    try {
+      const supabase = getSupabase(accessToken);
+      const { error } = await supabase
+        .from('todos')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+    } catch (error) {
+      logger.error('Erro ao excluir tarefa:', error);
+      throw error;
+    }
+  }
+};
+
+export default todoService;
+```
+
+3. Atualize o hook `useTodos` para utilizar o serviço:
+```javascript
+import { useState, useEffect } from 'react';
+import { useUser } from '@auth0/nextjs-auth0/client';
+import todoService from '../services/todoService';
+import logger from '../utils/logger';
+
+export function useTodos() {
+  const { user } = useUser();
+  const [todos, setTodos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchTodos = async () => {
+      try {
+        if (!user?.sub) return;
+        const data = await todoService.getTodos(user.accessToken, user.sub);
+        if (isMounted) {
+          setTodos(data);
+          setError(null);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message);
+          logger.error('Erro ao buscar tarefas:', err);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchTodos();
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
+
+  const addTodo = async (content) => {
+    try {
+      const newTodo = await todoService.createTodo(user.accessToken, user.sub, content);
+      setTodos([...todos, newTodo]);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+      logger.error('Erro ao adicionar tarefa:', err);
+    }
+  };
+
+  const editTodo = async (id, content) => {
+    try {
+      const updatedTodo = await todoService.updateTodo(user.accessToken, user.sub, id, content);
+      setTodos(todos.map(todo => todo.id === id ? updatedTodo : todo));
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+      logger.error('Erro ao editar tarefa:', err);
+    }
+  };
+
+  const deleteTodo = async (id) => {
+    try {
+      await todoService.deleteTodo(user.accessToken, user.sub, id);
+      setTodos(todos.filter(todo => todo.id !== id));
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+      logger.error('Erro ao excluir tarefa:', err);
+    }
+  };
+
+  return {
+    todos,
+    loading,
+    error,
+    addTodo,
+    editTodo,
+    deleteTodo
+  };
+}
+```
+
+### 7.4 Testes Unitários
+
+Para garantir a qualidade do código, vamos criar testes para o `todoService` e o hook `useTodos`. Primeiro, instale as dependências necessárias:
+
+```bash
+npm install --save-dev @testing-library/react-hooks --legacy-peer-deps
+```
+
+1. Crie a estrutura de pastas para os testes:
+```bash
+mkdir -p __tests__/services __tests__/hooks
+touch __tests__/services/todoService.test.js
+touch __tests__/hooks/useTodos.test.js
+```
+
+2. Implemente o teste do `todoService`:
+```javascript
+// __tests__/services/todoService.test.js
+import todoService from '../../services/todoService';
+import { getSupabase } from '../../utils/supabase';
+
+jest.mock('../../utils/supabase');
+jest.mock('../../utils/logger', () => ({
+  apiCall: jest.fn(),
+  error: jest.fn(),
+  info: jest.fn()
+}));
+
+describe('todoService', () => {
+  const mockSupabase = {
+    from: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
+    insert: jest.fn().mockReturnThis(),
+    update: jest.fn().mockReturnThis(),
+    delete: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    single: jest.fn().mockReturnThis()
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    getSupabase.mockReturnValue(mockSupabase);
+  });
+
+  describe('getTodos', () => {
+    it('deve retornar lista de tarefas', async () => {
+      const mockTodos = [{ id: 1, content: 'Test todo' }];
+      mockSupabase.select.mockResolvedValueOnce({ data: mockTodos, error: null });
+
+      const result = await todoService.getTodos('token', 'user123');
+      expect(result).toEqual(mockTodos);
+    });
+  });
+
+  describe('createTodo', () => {
+    it('deve criar uma nova tarefa', async () => {
+      const mockTodo = { id: 1, content: 'New todo' };
+      mockSupabase.single.mockResolvedValueOnce({ data: mockTodo, error: null });
+
+      const result = await todoService.createTodo('token', 'user123', 'New todo');
+      expect(result).toEqual(mockTodo);
+    });
+  });
+
+  describe('updateTodo', () => {
+    it('deve atualizar uma tarefa existente', async () => {
+      const mockTodo = { id: 1, content: 'Updated todo' };
+      mockSupabase.single.mockResolvedValueOnce({ data: mockTodo, error: null });
+
+      const result = await todoService.updateTodo('token', 'user123', 1, 'Updated todo');
+      expect(result).toEqual(mockTodo);
+    });
+  });
+
+  describe('deleteTodo', () => {
+    it('deve excluir uma tarefa', async () => {
+      mockSupabase.delete.mockResolvedValueOnce({ error: null });
+
+      await expect(todoService.deleteTodo('token', 'user123', 1)).resolves.not.toThrow();
+    });
+  });
+});
+```
+
+3. Implemente o teste do hook `useTodos`:
+```javascript
+// __tests__/hooks/useTodos.test.js
+import { renderHook, act } from '@testing-library/react-hooks';
+import { useUser } from '@auth0/nextjs-auth0/client';
+import { useTodos } from '../../hooks/useTodos';
+import todoService from '../../services/todoService';
+
+jest.mock('@auth0/nextjs-auth0/client');
+jest.mock('../../services/todoService');
+jest.mock('../../utils/logger', () => ({
+  error: jest.fn()
+}));
+
+describe('useTodos', () => {
+  const mockUser = {
+    sub: 'user123',
+    accessToken: 'token123'
+  };
+
+  beforeEach(() => {
+    useUser.mockReturnValue({ user: mockUser });
+    jest.clearAllMocks();
+  });
+
+  it('deve carregar tarefas iniciais', async () => {
+    const mockTodos = [{ id: 1, content: 'Test todo' }];
+    todoService.getTodos.mockResolvedValueOnce(mockTodos);
+
+    const { result, waitForNextUpdate } = renderHook(() => useTodos());
+    expect(result.current.loading).toBe(true);
+
+    await waitForNextUpdate();
+
+    expect(result.current.todos).toEqual(mockTodos);
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBeNull();
+  });
+
+  it('deve adicionar uma nova tarefa', async () => {
+    const mockNewTodo = { id: 2, content: 'New todo' };
+    todoService.createTodo.mockResolvedValueOnce(mockNewTodo);
+
+    const { result } = renderHook(() => useTodos());
+
+    await act(async () => {
+      await result.current.addTodo('New todo');
+    });
+
+    expect(result.current.todos).toContainEqual(mockNewTodo);
+  });
+
+  it('deve atualizar uma tarefa existente', async () => {
+    const mockUpdatedTodo = { id: 1, content: 'Updated todo' };
+    todoService.updateTodo.mockResolvedValueOnce(mockUpdatedTodo);
+
+    const { result } = renderHook(() => useTodos());
+
+    await act(async () => {
+      await result.current.editTodo(1, 'Updated todo');
+    });
+
+    expect(todoService.updateTodo).toHaveBeenCalledWith('token123', 'user123', 1, 'Updated todo');
+  });
+
+  it('deve excluir uma tarefa', async () => {
+    todoService.deleteTodo.mockResolvedValueOnce();
+
+    const { result } = renderHook(() => useTodos());
+
+    await act(async () => {
+      await result.current.deleteTodo(1);
+    });
+
+    expect(todoService.deleteTodo).toHaveBeenCalledWith('token123', 'user123', 1);
+  });
+});
+```
+
+Execute os testes com:
+```bash
+npm test
+```
+
+### 7.5 Benefícios da Nova Arquitetura
+
+1. **Separação de Responsabilidades**: Cada camada tem um papel específico
+2. **Reutilização de Código**: Operações CRUD centralizadas
+3. **Consistência**: Tratamento de erros padronizado
+4. **Testabilidade**: Facilidade para mockar o serviço nos testes
+
+### 7.6 Próximos Passos
+
+- [ ] Adicionar mais testes de integração
+- [ ] Implementar cache de dados no serviço
+- [ ] Adicionar validações de dados
+- [ ] Melhorar o tratamento de erros
+

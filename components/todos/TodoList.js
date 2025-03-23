@@ -1,4 +1,4 @@
-export default function TodoList({ todos, onEdit, onDelete, userRole }) {
+export default function TodoList({ todos, onEdit, onDelete, isAdmin }) {
   if (!todos || todos.length === 0) {
     return (
       <div className="todo-empty-message">
@@ -35,7 +35,7 @@ export default function TodoList({ todos, onEdit, onDelete, userRole }) {
                 >
                   Editar
                 </button>
-                {userRole === 'admin' && (
+                {isAdmin && (
                   <button
                     className="todo-delete-button"
                     onClick={() => {

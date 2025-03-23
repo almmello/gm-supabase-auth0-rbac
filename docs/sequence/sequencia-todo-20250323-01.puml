@@ -1,0 +1,117 @@
+@startuml App Sequence
+
+skinparam participant {
+    BackgroundColor<<Page>> LightBlue
+    BackgroundColor<<Component>> LightGreen
+    BackgroundColor<<Hook>> LightYellow
+    BackgroundColor<<Service>> LightSalmon
+    BackgroundColor<<API>> LightPink
+    BackgroundColor<<Auth>> LightGray
+}
+
+actor User
+participant "pages/index.js" as index <<Page>>
+participant "pages/api/auth/[...auth0].js" as auth <<Auth>>
+participant "components/TodoList.js" as list <<Component>>
+participant "components/TodoForm.js" as form <<Component>>
+participant "components/TodoItem.js" as item <<Component>>
+participant "hooks/useTodos.js" as hook <<Hook>>
+participant "utils/supabase.js" as supabase <<Service>>
+
+== Inicialização da Aplicação ==
+User -> index: Acessa a aplicação
+activate index
+
+index -> auth: Verifica autenticação
+activate auth
+auth --> index: Retorna sessão do usuário com JWT
+deactivate auth
+
+index -> form: Renderiza <TodoForm onSubmit={addTodo} />
+activate form
+index -> list: Renderiza <TodoList todos={todos} onEdit={editTodo} onDelete={deleteTodo} userRole={userRole} />
+activate list
+
+== Carregamento Inicial dos Dados ==
+list -> hook: useFetchTodos()
+activate hook
+hook -> supabase: getSupabase(user.accessToken)
+activate supabase
+supabase --> hook: Cliente Supabase configurado
+deactivate supabase
+hook -> supabase: from('todos').select().eq('user_id', user.sub)
+activate supabase
+supabase --> hook: Retorna lista de tarefas
+deactivate supabase
+hook --> list: Atualiza estado com tarefas
+deactivate hook
+
+form -> hook: useAddTodo()
+activate hook
+hook --> form: Retorna { addTodo }
+deactivate hook
+deactivate form
+
+list -> item: Renderiza TodoItem para cada tarefa
+activate item
+item -> hook: useEditTodo(), useDeleteTodo()
+activate hook
+hook --> item: Retorna { editTodo, deleteTodo }
+deactivate hook
+deactivate item
+
+== Adicionar Tarefa ==
+User -> form: Submete nova tarefa
+activate form
+form -> hook: addTodo(novaTarefa)
+activate hook
+hook -> supabase: getSupabase(user.accessToken)
+activate supabase
+supabase --> hook: Cliente Supabase configurado
+deactivate supabase
+hook -> supabase: from('todos').insert({ content, user_id: user.sub }).select()
+activate supabase
+supabase --> hook: Retorna nova tarefa
+deactivate supabase
+hook --> list: Atualiza estado
+deactivate hook
+deactivate form
+
+== Editar Tarefa ==
+User -> item: Edita tarefa
+activate item
+item -> hook: editTodo(tarefaEditada)
+activate hook
+hook -> supabase: getSupabase(user.accessToken)
+activate supabase
+supabase --> hook: Cliente Supabase configurado
+deactivate supabase
+hook -> supabase: from('todos').update({ content }).eq('id', id).eq('user_id', user.sub).select()
+activate supabase
+supabase --> hook: Retorna tarefa atualizada
+deactivate supabase
+hook --> list: Atualiza estado
+deactivate hook
+deactivate item
+
+== Excluir Tarefa ==
+User -> item: Exclui tarefa
+activate item
+item -> hook: deleteTodo(id)
+activate hook
+hook -> supabase: getSupabase(user.accessToken)
+activate supabase
+supabase --> hook: Cliente Supabase configurado
+deactivate supabase
+hook -> supabase: from('todos').delete().match({ id, user_id: user.sub })
+activate supabase
+supabase --> hook: Confirma exclusão
+deactivate supabase
+hook --> list: Atualiza estado
+deactivate hook
+deactivate item
+
+deactivate list
+deactivate index
+
+@enduml 

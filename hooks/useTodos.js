@@ -1,169 +1,83 @@
+import { useState, useEffect } from 'react';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useRouter } from 'next/router';
-import { getSupabase } from '../utils/supabase';
+import { todoService } from '../services/todoService';
 import logger from '../utils/logger';
-import { useCallback } from 'react';
 
-export const useFetchTodos = () => {
-  const { user } = useUser();
+export function useTodos() {
+  const { user, error: userError } = useUser();
   const router = useRouter();
+  const [todos, setTodos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const fetchTodos = useCallback(async () => {
+  const fetchTodos = async () => {
     try {
-      const supabase = await getSupabase(user.accessToken);
-      
-      logger.apiCall('Supabase', 'select', { table: 'todos' });
-      
-      const { data, error } = await supabase
-        .from('todos')
-        .select('*')
-        .eq('user_id', user.sub);
-
-      if (error) {
-        if (error.message.includes('JWT')) {
-          router.push('/api/auth/login');
-          return [];
-        }
-        throw error;
-      }
-
-      return data || [];
+      if (!user) return;
+      const data = await todoService.getTodos(user.accessToken, user.sub);
+      setTodos(data);
     } catch (error) {
-      logger.error('Erro ao buscar tarefas', error);
-      throw error;
+      logger.error('Erro ao buscar tarefas:', error);
+      setError('Erro ao carregar tarefas');
+    } finally {
+      setLoading(false);
     }
-  }, [user?.accessToken, user?.sub, router]);
-
-  return { fetchTodos };
-};
-
-export const useAddTodo = () => {
-  const { user } = useUser();
-  const router = useRouter();
+  };
 
   const addTodo = async (content) => {
     try {
-      const supabase = await getSupabase(user.accessToken);
-      
-      logger.apiCall('Supabase', 'insert', { table: 'todos', content });
-      
-      const { data, error } = await supabase
-        .from('todos')
-        .insert({ content, user_id: user.sub })
-        .select();
-
-      if (error) {
-        if (error.message.includes('JWT')) {
-          router.push('/api/auth/login');
-          return null;
-        }
-        throw error;
-      }
-
-      logger.info('Tarefa adicionada com sucesso');
-      return data[0];
+      if (!user) return;
+      const newTodo = await todoService.createTodo(user.accessToken, user.sub, content);
+      setTodos(prev => [...prev, newTodo]);
+      return newTodo;
     } catch (error) {
-      logger.error('Erro ao adicionar tarefa', error);
-      throw error;
+      logger.error('Erro ao adicionar tarefa:', error);
+      setError('Erro ao adicionar tarefa');
     }
   };
-
-  return { addTodo };
-};
-
-export const useEditTodo = () => {
-  const { user } = useUser();
-  const router = useRouter();
 
   const editTodo = async (id, content) => {
     try {
-      if (!user?.accessToken) {
-        logger.error('Token de acesso não encontrado');
-        throw new Error('Token de acesso não encontrado');
-      }
-
-      if (!user?.sub) {
-        logger.error('ID do usuário não encontrado');
-        throw new Error('ID do usuário não encontrado');
-      }
-
-      const supabase = await getSupabase(user.accessToken);
-      
-      logger.apiCall('Supabase', 'update', { 
-        table: 'todos', 
-        id, 
-        content,
-        user_id: user.sub 
-      });
-      
-      const { data, error } = await supabase
-        .from('todos')
-        .update({ content })
-        .eq('id', id)
-        .eq('user_id', user.sub)
-        .select();
-
-      if (error) {
-        logger.error('Erro ao atualizar tarefa:', {
-          error,
-          user_id: user.sub,
-          todo_id: id
-        });
-        if (error.message.includes('JWT')) {
-          router.push('/api/auth/login');
-          return null;
-        }
-        throw error;
-      }
-
-      if (!data || data.length === 0) {
-        logger.error('Nenhum dado retornado após atualização', {
-          user_id: user.sub,
-          todo_id: id
-        });
-        throw new Error('Nenhum dado retornado após atualização');
-      }
-
-      logger.info('Tarefa atualizada com sucesso:', data[0]);
-      return data[0];
+      if (!user) return;
+      const updatedTodo = await todoService.updateTodo(user.accessToken, user.sub, id, content);
+      setTodos(prev => prev.map(todo => 
+        todo.id === id ? updatedTodo : todo
+      ));
+      return updatedTodo;
     } catch (error) {
-      logger.error('Erro ao atualizar tarefa:', error);
-      throw error;
+      logger.error('Erro ao editar tarefa:', error);
+      setError('Erro ao editar tarefa');
     }
   };
-
-  return { editTodo };
-};
-
-export const useDeleteTodo = () => {
-  const { user } = useUser();
-  const router = useRouter();
 
   const deleteTodo = async (id) => {
     try {
-      const supabase = await getSupabase(user.accessToken);
-      
-      logger.apiCall('Supabase', 'delete', { table: 'todos', id });
-      
-      const { error } = await supabase
-        .from('todos')
-        .delete()
-        .match({ id, user_id: user.sub });
-
-      if (error) {
-        if (error.message.includes('JWT')) {
-          router.push('/api/auth/login');
-          return;
-        }
-        throw error;
-      }
-
-      logger.info('Tarefa excluída com sucesso');
+      if (!user) return;
+      await todoService.deleteTodo(user.accessToken, user.sub, id);
+      setTodos(prev => prev.filter(todo => todo.id !== id));
     } catch (error) {
-      logger.error('Erro ao excluir tarefa', error);
-      throw error;
+      logger.error('Erro ao excluir tarefa:', error);
+      setError('Erro ao excluir tarefa');
     }
   };
 
-  return { deleteTodo };
-}; 
+  useEffect(() => {
+    if (userError) {
+      setError('Erro ao carregar usuário');
+      setLoading(false);
+      return;
+    }
+
+    fetchTodos();
+  }, [user]);
+
+  return {
+    todos,
+    loading,
+    error,
+    addTodo,
+    editTodo,
+    deleteTodo,
+    refreshTodos: fetchTodos
+  };
+} 
