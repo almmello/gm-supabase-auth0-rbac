@@ -871,3 +871,59 @@ Para aplicar estas correções, certifique-se de:
 2. Fazer logout e login novamente para obter um novo token JWT com a estrutura correta
 3. Testar as operações de CRUD tanto como admin quanto como usuário comum
 
+### 5.6 Melhorias na Interface e Tratamento de Erros
+
+Após identificar que usuários comuns ainda podiam ver o botão de exclusão, implementamos melhorias na interface e no tratamento de erros:
+
+1. **Ocultação Condicional do Botão de Exclusão**
+   - O botão de exclusão agora só é exibido para usuários com role 'admin'
+   - Implementado através de renderização condicional no componente `TodoList`
+
+2. **Validação Dupla de Permissões**
+   - Interface: O botão não aparece para usuários não-admin
+   - Backend: Validação adicional no handler de exclusão
+   - Mensagem de erro clara quando usuário tenta excluir sem permissão
+
+3. **Melhorias no Tratamento de Erros**
+   - Mensagens de erro mais descritivas
+   - Feedback visual imediato para o usuário
+   - Logs mais detalhados para debugging
+
+Exemplo de implementação:
+
+```jsx
+// No componente TodoList
+{userRole === 'admin' && (
+  <button
+    className="todo-delete-button"
+    onClick={() => {
+      if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+        onDelete(todo.id);
+      }
+    }}
+  >
+    Excluir
+  </button>
+)}
+
+// No handler de exclusão
+const handleDeleteTodo = async (id) => {
+  try {
+    if (currentUser.role !== 'admin') {
+      setError('Você não tem permissão para excluir tarefas. Apenas administradores podem realizar esta operação.');
+      return;
+    }
+    await deleteTodo(id);
+    setTodos(todos.filter(todo => todo.id !== id));
+  } catch (err) {
+    setError(err.message || 'Erro ao excluir tarefa. Por favor, tente novamente.');
+  }
+};
+```
+
+Estas melhorias garantem que:
+1. A interface reflita corretamente as permissões do usuário
+2. Usuários recebam feedback claro sobre suas ações
+3. A segurança seja mantida tanto no frontend quanto no backend
+4. A experiência do usuário seja mais intuitiva e profissional
+

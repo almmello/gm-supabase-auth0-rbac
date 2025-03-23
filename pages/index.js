@@ -70,10 +70,14 @@ function Home({ user: serverUser }) {
 
   const handleDeleteTodo = async (id) => {
     try {
+      if (!isAdmin) {
+        setError('Você não tem permissão para excluir tarefas. Apenas administradores podem realizar esta operação.');
+        return;
+      }
       await deleteTodo(id);
       setTodos(todos.filter(todo => todo.id !== id));
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Erro ao excluir tarefa. Por favor, tente novamente.');
     }
   };
 
@@ -114,6 +118,9 @@ function Home({ user: serverUser }) {
   }
 
   const currentUser = user || serverUser;
+  const namespace = 'gm-supabase-tutorial.us.auth0.com';
+  const userRoles = currentUser[`${namespace}/roles`] || [];
+  const isAdmin = userRoles.includes('admin');
 
   return (
     <div className="main-container">
@@ -132,8 +139,8 @@ function Home({ user: serverUser }) {
           <header className="header">
             <div className="user-info">
               <span className="user-name">{currentUser.name}</span>
-              <span className={`role-badge ${currentUser.role === 'admin' ? 'role-badge-admin' : 'role-badge-user'}`}>
-                {currentUser.role === 'admin' ? 'Admin' : 'Usuário'}
+              <span className={`role-badge ${isAdmin ? 'role-badge-admin' : 'role-badge-user'}`}>
+                {isAdmin ? 'Admin' : 'Usuário'}
               </span>
             </div>
             <a href="/api/auth/logout" className="logout-link">
@@ -159,6 +166,7 @@ function Home({ user: serverUser }) {
             todos={todos}
             onEdit={handleEditTodo}
             onDelete={handleDeleteTodo}
+            userRole={isAdmin ? 'admin' : 'user'}
           />
         )}
       </div>

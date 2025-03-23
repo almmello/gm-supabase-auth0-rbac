@@ -1,4 +1,4 @@
-export default function TodoList({ todos, onEdit, onDelete }) {
+export default function TodoList({ todos, onEdit, onDelete, userRole }) {
   if (!todos || todos.length === 0) {
     return (
       <div className="todo-empty-message">
@@ -35,16 +35,18 @@ export default function TodoList({ todos, onEdit, onDelete }) {
                 >
                   Editar
                 </button>
-                <button
-                  className="todo-delete-button"
-                  onClick={() => {
-                    if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
-                      onDelete(todo.id);
-                    }
-                  }}
-                >
-                  Excluir
-                </button>
+                {userRole === 'admin' && (
+                  <button
+                    className="todo-delete-button"
+                    onClick={() => {
+                      if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+                        onDelete(todo.id);
+                      }
+                    }}
+                  >
+                    Excluir
+                  </button>
+                )}
               </div>
             </div>
           </div>
