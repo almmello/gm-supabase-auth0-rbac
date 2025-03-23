@@ -24,7 +24,7 @@ const afterCallback = async (req, res, session) => {
     const roles = decodedToken[`${namespace}/roles`] || [];
     
     const payload = {
-      userId: session.user.sub,
+      sub: session.user.sub,
       exp: Math.floor(Date.now() / 1000) + 60 * 60,
       role: 'authenticated',
       roles: roles,

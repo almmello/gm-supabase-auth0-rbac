@@ -737,3 +737,137 @@ export const useTodos = () => {
 
 Esta nova estrutura não apenas melhora a qualidade do código, mas também estabelece uma base sólida para o crescimento futuro da aplicação, mantendo a consistência visual da marca Goalmoon.
 
+## 5. Correções e Melhorias na Autenticação e Atualização de Registros
+
+Durante o desenvolvimento, identificamos e corrigimos alguns problemas importantes relacionados à autenticação e atualização de registros. Vamos detalhar as correções necessárias:
+
+### 5.1 Correção do Payload do Token JWT
+
+No arquivo `pages/api/auth/[...auth0].js`, identificamos que o payload do token JWT estava usando `userId` em vez de `sub`, que é o que a política RLS do Supabase espera. Fizemos a seguinte correção:
+
+```js
+const payload = {
+  sub: session.user.sub,  // Alterado de userId para sub
+  exp: Math.floor(Date.now() / 1000) + 60 * 60,
+  role: 'authenticated',
+  roles: roles,
+};
+```
+
+### 5.2 Otimização do Hook useFetchTodos
+
+No arquivo `hooks/useTodos.js`, implementamos o `useCallback` para evitar recriações desnecessárias da função `fetchTodos`, que estava causando loops infinitos de chamadas à API:
+
+```js
+const fetchTodos = useCallback(async () => {
+  try {
+    const supabase = await getSupabase(user.accessToken);
+    const { data, error } = await supabase
+      .from('todos')
+      .select('*')
+      .eq('user_id', user.sub);
+    // ... resto do código
+  } catch (error) {
+    // ... tratamento de erro
+  }
+}, [user?.accessToken, user?.sub, router]);
+```
+
+### 5.3 Melhorias no Hook useEditTodo
+
+Adicionamos validações e logs mais detalhados no hook `useEditTodo` para melhor diagnóstico de problemas:
+
+```js
+const editTodo = async (id, content) => {
+  try {
+    if (!user?.accessToken) {
+      logger.error('Token de acesso não encontrado');
+      throw new Error('Token de acesso não encontrado');
+    }
+
+    if (!user?.sub) {
+      logger.error('ID do usuário não encontrado');
+      throw new Error('ID do usuário não encontrado');
+    }
+
+    const supabase = await getSupabase(user.accessToken);
+    
+    logger.apiCall('Supabase', 'update', { 
+      table: 'todos', 
+      id, 
+      content,
+      user_id: user.sub 
+    });
+    
+    const { data, error } = await supabase
+      .from('todos')
+      .update({ content })
+      .eq('id', id)
+      .eq('user_id', user.sub)
+      .select();
+
+    if (!data || data.length === 0) {
+      logger.error('Nenhum dado retornado após atualização', {
+        user_id: user.sub,
+        todo_id: id
+      });
+      throw new Error('Nenhum dado retornado após atualização');
+    }
+
+    return data[0];
+  } catch (error) {
+    logger.error('Erro ao atualizar tarefa:', error);
+    throw error;
+  }
+};
+```
+
+### 5.4 Melhorias no Gerenciamento de Estado
+
+No arquivo `pages/index.js`, implementamos um mecanismo de cleanup no `useEffect` para evitar atualizações de estado em componentes desmontados:
+
+```js
+useEffect(() => {
+  let isMounted = true;
+
+  const loadTodos = async () => {
+    if (!user) return;
+    
+    try {
+      const todos = await fetchTodos();
+      if (isMounted) {
+        setTodos(todos);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar tarefas:', error);
+    }
+  };
+
+  loadTodos();
+
+  return () => {
+    isMounted = false;
+  };
+}, [user, fetchTodos]);
+```
+
+### 5.5 Resumo das Correções
+
+As principais correções implementadas foram:
+
+1. **Correção do Token JWT**: Ajustamos o payload para usar `sub` em vez de `userId`, alinhando com as expectativas do Supabase.
+2. **Otimização de Performance**: Implementamos `useCallback` para evitar loops infinitos de chamadas à API.
+3. **Melhor Tratamento de Erros**: Adicionamos validações e logs mais detalhados para facilitar o diagnóstico de problemas.
+4. **Prevenção de Memory Leaks**: Implementamos cleanup no `useEffect` para evitar atualizações de estado em componentes desmontados.
+
+Estas correções resolveram os problemas de:
+- Loops infinitos de chamadas à API
+- Falha na atualização de registros por usuários comuns
+- Possíveis memory leaks
+- Melhor diagnóstico de erros de autenticação e autorização
+
+Para aplicar estas correções, certifique-se de:
+1. Reiniciar o servidor após as alterações
+2. Fazer logout e login novamente para obter um novo token JWT com a estrutura correta
+3. Testar as operações de CRUD tanto como admin quanto como usuário comum
+

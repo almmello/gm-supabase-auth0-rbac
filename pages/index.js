@@ -20,21 +20,33 @@ function Home({ user: serverUser }) {
   const { deleteTodo } = useDeleteTodo();
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadTodos = async () => {
       try {
         const data = await fetchTodos();
-        setTodos(data);
+        if (isMounted) {
+          setTodos(data);
+        }
       } catch (err) {
-        setError(err.message);
+        if (isMounted) {
+          setError(err.message);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
-    if (user) {
+    if (user?.accessToken) {
       loadTodos();
     }
-  }, [user, fetchTodos]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.accessToken, fetchTodos]);
 
   const handleAddTodo = async (content) => {
     try {
