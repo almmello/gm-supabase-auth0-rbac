@@ -22,7 +22,7 @@ export default function TodoForm({ onSubmit }) {
           className="todo-input"
           autoComplete="off"
         />
-        <button type="submit" className="todo-button">
+        <button type="submit" className="action-button button-primary">
           Adicionar
         </button>
       </div>

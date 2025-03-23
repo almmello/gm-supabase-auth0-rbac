@@ -1,6 +1,5 @@
 import { withPageAuthRequired, getSession } from '@auth0/nextjs-auth0';
 import { useUser } from '@auth0/nextjs-auth0/client';
-import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import TodoList from '../components/todos/TodoList';
 import TodoForm from '../components/todos/TodoForm';
@@ -14,14 +13,14 @@ function Dashboard({ user: serverUser }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="loading-spinner" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-red-500">
+      <div className="flex items-center justify-center min-h-screen text-burgundy">
         {error}
       </div>
     );
@@ -32,57 +31,56 @@ function Dashboard({ user: serverUser }) {
 
   return (
     <BaseLayout>
-      <div className="min-h-screen bg-gray-100">
-        <header className="bg-white shadow">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center">
-                <Image
-                  src="/images/goalmoon-logo.png"
-                  alt="Goalmoon"
-                  width={120}
-                  height={40}
-                  className="h-8 w-auto"
-                  priority
-                />
-                <span className="ml-3 text-xl font-semibold text-gray-900">Todo App</span>
-              </div>
-              <div className="flex items-center space-x-4">
-                <span className="text-gray-700">{currentUser.name}</span>
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  isAdmin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
-                }`}>
-                  {isAdmin ? 'Admin' : 'Usuário'}
-                </span>
-                <a
-                  href="/api/auth/logout"
-                  className="text-gray-600 hover:text-gray-900"
-                >
-                  Sair
-                </a>
-              </div>
+      <div className="dashboard-container">
+        <header className="dashboard-header">
+          <div className="header-content">
+            <div className="header-left">
+              <Image
+                src="/images/goalmoon-logo.png"
+                alt="Goalmoon"
+                width={120}
+                height={40}
+                priority
+              />
+            </div>
+            <div className="header-center">
+              <h1 className="header-title">TODO</h1>
+            </div>
+            <div className="header-right">
+              <span className="user-badge">{currentUser.name}</span>
+              <span className={isAdmin ? 'user-badge badge-admin' : 'user-badge badge-user'}>
+                {isAdmin ? 'Admin' : 'Usuário'}
+              </span>
+              <a
+                href="/api/auth/logout"
+                className="action-button button-danger"
+              >
+                Sair
+              </a>
             </div>
           </div>
         </header>
 
-        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0">
-            <TodoForm onSubmit={addTodo} />
-            
-            {error && (
-              <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-4 text-red-700">
-                {error}
-              </div>
-            )}
+        <main className="dashboard-content">
+          <TodoForm onSubmit={addTodo} />
+          
+          {error && (
+            <div className="bg-burgundy/20 border border-burgundy/30 rounded-2xl p-4 text-burgundy">
+              {error}
+            </div>
+          )}
 
-            <TodoList
-              todos={todos}
-              onEdit={editTodo}
-              onDelete={deleteTodo}
-              isAdmin={isAdmin}
-            />
-          </div>
+          <TodoList
+            todos={todos}
+            onEdit={editTodo}
+            onDelete={deleteTodo}
+            isAdmin={isAdmin}
+          />
         </main>
+
+        <footer className="dashboard-footer">
+          <p>&copy; {new Date().getFullYear()} Goalmoon. Todos os direitos reservados.</p>
+        </footer>
       </div>
     </BaseLayout>
   );

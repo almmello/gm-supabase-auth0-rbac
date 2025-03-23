@@ -5,156 +5,237 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* Cores Primárias */
-    --color-deep-navy: #374161;
-    --color-dark-slate: #293047;
-    --color-blue-light: #6374AD;
-    --color-blue-lighter: #879FED;
-    --color-blue-gray: #3F4A6E;
-    
-    /* Cores Secundárias */
-    --color-mint: #71b399;
-    --color-gray-light: #dbe2ea;
-    --color-gray-lighter: #eaf0f5;
-    --color-cream: #E6E0D3;
-    --color-cream-light: #E2DBCD;
-    
-    /* Cores Terrosas */
-    --color-burgundy: #562632;
-    --color-brown: #856968;
-    --color-cream-dark: #FCF7E4;
-    --color-dark-brown: #29212C;
-    --color-navy: #192639;
-    
-    /* Cores de Texto */
-    --color-text-primary: #293047;
-    --color-text-secondary: #374161;
-    --color-text-light: #dbe2ea;
-  }
-
   body {
-    @apply bg-[#293047] text-[#eaf0f5] font-['Montserrat'];
+    @apply bg-[#293047] text-[#eaf0f5] font-montserrat;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-['Montserrat'] font-bold;
+    @apply font-montserrat font-bold;
   }
 }
 
 @layer components {
-  /* Container Principal */
-  .main-container {
-    @apply min-h-screen bg-[#293047] py-8 px-4;
+  /* Landing Page */
+  .landing-container {
+    @apply min-h-screen bg-gradient-to-b from-[#293047] to-[#374161] flex flex-col;
   }
 
-  .content-wrapper {
-    @apply max-w-3xl mx-auto space-y-6;
+  .landing-nav {
+    @apply w-full py-6 px-8 flex justify-between items-center;
   }
 
-  /* Header */
-  .header-container {
-    @apply space-y-6;
+  .landing-logo {
+    @apply w-[180px] h-auto;
   }
 
-  .logo-container {
-    @apply flex justify-start mb-6 px-2;
+  .landing-nav-button {
+    @apply bg-[#879FED] text-[#293047] px-6 py-2.5 rounded-full 
+           font-semibold transition-all duration-200
+           hover:bg-[#6374AD] hover:text-white
+           shadow-[0_4px_12px_-2px_rgba(135,159,237,0.3)]
+           hover:shadow-[0_6px_16px_-4px_rgba(99,116,173,0.4)];
   }
 
-  .header {
-    @apply flex items-center justify-between bg-[#374161] rounded-2xl p-5
-           border border-[#3F4A6E]/30 shadow-md;
+  .landing-hero {
+    @apply flex-1 flex flex-col items-center justify-center px-8 py-16 max-w-6xl mx-auto;
   }
 
-  .user-info {
-    @apply flex items-center gap-3;
+  .landing-content {
+    @apply w-full bg-gradient-to-br from-[#374161] to-[#3F4A6E]
+           rounded-3xl border border-[#6374AD]/20 
+           shadow-[0_8px_32px_-8px_rgba(55,65,97,0.5)]
+           p-12;
   }
 
-  .user-name {
-    @apply text-[#eaf0f5] font-semibold text-sm;
+  .landing-title {
+    @apply text-5xl font-bold text-[#eaf0f5] mb-6 text-center
+           leading-tight tracking-tight;
   }
 
-  .logout-link {
-    @apply bg-[#879FED] text-[#293047] hover:bg-[#6374AD] hover:text-white 
-           transition-colors duration-200 text-sm font-semibold 
-           px-5 py-2 rounded-full shadow-sm hover:shadow-md;
+  .landing-subtitle {
+    @apply text-2xl font-semibold text-[#879FED] mb-12 text-center
+           leading-relaxed;
   }
 
-  /* Formulário */
+  .landing-description {
+    @apply text-[#dbe2ea] text-lg mb-16 text-center max-w-2xl mx-auto
+           leading-relaxed;
+  }
+
+  .landing-features {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-8 mb-16;
+  }
+
+  .landing-feature {
+    @apply flex items-center gap-4 p-4;
+  }
+
+  .feature-dot {
+    @apply w-2.5 h-2.5 rounded-full bg-[#71b399] flex-shrink-0
+           ring-4 ring-[#71b399]/20;
+  }
+
+  .feature-text {
+    @apply text-[#eaf0f5] text-base leading-relaxed;
+  }
+
+  .landing-cta {
+    @apply bg-[#71b399] text-[#293047] 
+           px-10 py-4 rounded-full font-bold text-lg
+           transition-all duration-200 
+           hover:bg-[#879FED] hover:text-[#293047]
+           transform hover:scale-105
+           shadow-[0_8px_16px_-4px_rgba(113,179,153,0.5)]
+           hover:shadow-[0_12px_24px_-6px_rgba(135,159,237,0.5)]
+           mx-auto block w-fit;
+  }
+
+  .landing-footer {
+    @apply py-8 text-center text-[#879FED] text-sm font-medium;
+  }
+
+  /* Dashboard */
+  .dashboard-container {
+    @apply min-h-screen bg-gradient-to-b from-[#293047] to-[#374161];
+  }
+
+  .dashboard-header {
+    @apply bg-gradient-to-r from-[#374161] to-[#3F4A6E]
+           border-b border-[#6374AD]/20 mb-12
+           shadow-[0_4px_16px_-4px_rgba(55,65,97,0.3)];
+  }
+
+  .header-content {
+    @apply max-w-7xl mx-auto px-8 py-4
+           grid grid-cols-3 items-center;
+  }
+
+  .header-left {
+    @apply flex items-center;
+  }
+
+  .header-brand {
+    @apply flex items-center gap-4;
+  }
+
+  .header-center {
+    @apply flex justify-center items-center;
+  }
+
+  .header-title {
+    @apply text-2xl font-bold text-[#eaf0f5]
+           tracking-tight;
+  }
+
+  .header-right {
+    @apply flex items-center gap-4 justify-end;
+  }
+
+  .user-badge {
+    @apply px-5 py-2 rounded-full text-sm font-semibold
+           shadow-[0_2px_8px_-2px_rgba(55,65,97,0.3)]
+           border border-transparent transition-all duration-200;
+  }
+
+  .badge-admin {
+    @apply bg-[#71b399] text-[#293047]
+           hover:border-[#71b399]/50;
+  }
+
+  .badge-user {
+    @apply bg-[#879FED] text-[#293047]
+           hover:border-[#879FED]/50;
+  }
+
+  .dashboard-content {
+    @apply max-w-4xl mx-auto px-8;
+  }
+
   .todo-form {
-    @apply bg-[#374161] rounded-2xl p-5 
-           border border-[#3F4A6E]/30 shadow-md;
+    @apply bg-gradient-to-br from-[#374161] to-[#3F4A6E]
+           rounded-2xl p-6 mb-8
+           border border-[#6374AD]/20 
+           shadow-[0_8px_32px_-8px_rgba(55,65,97,0.5)];
   }
 
   .todo-input-wrapper {
-    @apply flex gap-3;
+    @apply flex gap-4;
   }
 
   .todo-input {
-    @apply flex-1 bg-[#3F4A6E] rounded-full px-5 py-2.5
-           text-[#eaf0f5] placeholder-[#6374AD] text-sm
-           border-2 border-[#6374AD]/20
-           focus:outline-none focus:border-[#71b399]
+    @apply flex-1 bg-[#3F4A6E]/80 rounded-full px-6 py-3
+           text-[#eaf0f5] placeholder-[#6374AD]/70 
+           border-2 border-[#6374AD]/20 
+           focus:border-[#71b399] focus:bg-[#3F4A6E]
+           shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]
            transition-all duration-200;
   }
 
-  .todo-button {
-    @apply bg-[#71b399] text-[#293047] hover:bg-[#879FED] hover:text-[#293047]
-           transition-colors duration-200 text-sm font-semibold
-           px-6 py-2.5 rounded-full shadow-sm hover:shadow-md;
-  }
-
-  /* Lista de Tarefas */
   .todo-list {
     @apply space-y-3;
   }
 
   .todo-item {
-    @apply bg-[#374161] rounded-2xl p-5
-           border border-[#3F4A6E]/30 shadow-md
-           hover:border-[#6374AD]/50 transition-all duration-200;
+    @apply bg-gradient-to-br from-[#374161] to-[#3F4A6E]/90
+           rounded-2xl p-4
+           border border-[#6374AD]/20 
+           shadow-[0_4px_16px_-4px_rgba(55,65,97,0.2)]
+           hover:shadow-[0_8px_24px_-6px_rgba(55,65,97,0.3)]
+           hover:border-[#6374AD]/30
+           transition-all duration-200
+           flex items-center justify-between;
   }
 
   .todo-content {
-    @apply text-[#eaf0f5] text-sm font-medium flex-1;
+    @apply text-[#eaf0f5] text-base leading-relaxed
+           px-2 flex-1;
   }
 
   .todo-actions {
-    @apply flex items-center gap-3;
+    @apply flex items-center gap-3 justify-end;
   }
 
-  .todo-edit-button {
-    @apply bg-[#879FED] text-[#293047] hover:bg-[#6374AD] hover:text-white
-           transition-colors duration-200 text-sm font-semibold
-           px-5 py-2 rounded-full shadow-sm hover:shadow-md;
+  .action-button {
+    @apply px-4 py-1.5 rounded-full text-sm font-medium
+           transition-all duration-200
+           shadow-sm hover:shadow-md;
   }
 
-  .todo-delete-button {
-    @apply bg-[#E2DBCD] text-[#562632] hover:bg-[#562632] hover:text-white
-           transition-colors duration-200 text-sm font-semibold
-           px-5 py-2 rounded-full shadow-sm hover:shadow-md;
+  .button-primary {
+    @apply bg-[#71b399] text-[#293047] 
+           hover:bg-[#71b399]/90
+           shadow-[0_4px_12px_-2px_rgba(113,179,153,0.3)]
+           hover:shadow-[0_6px_16px_-4px_rgba(113,179,153,0.4)];
   }
 
-  .todo-empty-message {
-    @apply text-center py-8 text-[#6374AD] text-sm font-medium italic;
+  .button-secondary {
+    @apply bg-[#879FED] text-[#293047] 
+           hover:bg-[#6374AD] hover:text-white
+           shadow-[0_4px_12px_-2px_rgba(135,159,237,0.3)]
+           hover:shadow-[0_6px_16px_-4px_rgba(99,116,173,0.4)];
   }
 
-  /* Badges */
-  .role-badge {
-    @apply px-4 py-1.5 rounded-full text-xs font-semibold shadow-sm;
+  .button-danger {
+    @apply bg-[#E2DBCD] text-[#562632] 
+           hover:bg-[#562632] hover:text-white
+           shadow-[0_4px_12px_-2px_rgba(226,219,205,0.3)]
+           hover:shadow-[0_6px_16px_-4px_rgba(86,38,50,0.4)];
   }
 
-  .role-badge-admin {
-    @apply bg-[#71b399] text-[#293047];
+  .todo-empty {
+    @apply text-center py-16 text-[#6374AD]/70 text-lg italic
+           bg-[#3F4A6E]/20 rounded-2xl border border-[#6374AD]/10;
   }
 
-  .role-badge-user {
-    @apply bg-[#879FED] text-[#293047];
-  }
-
-  /* Loading */
   .loading-spinner {
-    @apply animate-spin rounded-full border-4 border-[#3F4A6E]
-           border-t-[#71b399] h-8 w-8;
+    @apply animate-spin rounded-full 
+           border-4 border-[#3F4A6E]/30 border-t-[#71b399]
+           h-12 w-12 
+           shadow-[0_4px_12px_-2px_rgba(113,179,153,0.2)];
+  }
+
+  .dashboard-footer {
+    @apply py-6 text-center text-[#6374AD] text-sm font-medium
+           border-t border-[#6374AD]/20 mt-8;
   }
 }

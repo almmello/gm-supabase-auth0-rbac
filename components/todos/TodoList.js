@@ -1,7 +1,7 @@
 export default function TodoList({ todos, onEdit, onDelete, isAdmin }) {
   if (!todos || todos.length === 0) {
     return (
-      <div className="todo-empty-message">
+      <div className="todo-empty">
         Nenhuma tarefa encontrada. Adicione uma nova tarefa acima.
       </div>
     );
@@ -17,37 +17,37 @@ export default function TodoList({ todos, onEdit, onDelete, isAdmin }) {
 
         return (
           <div key={todo.id} className="todo-item">
-            <div className="flex justify-between items-center">
-              <span className="todo-content">{todo.content || 'Tarefa sem conteúdo'}</span>
-              <div className="todo-actions">
+            <div className="todo-content">
+              {todo.content || 'Tarefa sem conteúdo'}
+            </div>
+            <div className="todo-actions">
+              <button
+                className="action-button button-secondary"
+                onClick={() => {
+                  if (!todo.content) {
+                    alert('Não é possível editar uma tarefa sem conteúdo');
+                    return;
+                  }
+                  const newContent = prompt('Editar tarefa:', todo.content);
+                  if (newContent && newContent !== todo.content) {
+                    onEdit(todo.id, newContent);
+                  }
+                }}
+              >
+                Editar
+              </button>
+              {isAdmin && (
                 <button
-                  className="todo-edit-button"
+                  className="action-button button-danger"
                   onClick={() => {
-                    if (!todo.content) {
-                      alert('Não é possível editar uma tarefa sem conteúdo');
-                      return;
-                    }
-                    const newContent = prompt('Editar tarefa:', todo.content);
-                    if (newContent && newContent !== todo.content) {
-                      onEdit(todo.id, newContent);
+                    if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+                      onDelete(todo.id);
                     }
                   }}
                 >
-                  Editar
+                  Excluir
                 </button>
-                {isAdmin && (
-                  <button
-                    className="todo-delete-button"
-                    onClick={() => {
-                      if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
-                        onDelete(todo.id);
-                      }
-                    }}
-                  >
-                    Excluir
-                  </button>
-                )}
-              </div>
+              )}
             </div>
           </div>
         );

@@ -4,8 +4,8 @@ export default function BaseLayout({ children }) {
   return (
     <>
       <Head>
-        <title>Goalmoon Todo</title>
-        <meta name="description" content="Goalmoon Todo - Gerenciador de tarefas" />
+        <title>Goalmoon TODO</title>
+        <meta name="description" content="Goalmoon TODO - Gerenciador de tarefas" />
         <link rel="icon" href="/favicon.ico" />
         {/* Preload da imagem do logo */}
         <link

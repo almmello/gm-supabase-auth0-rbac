@@ -1,38 +1,42 @@
 import PublicLayout from '../../components/layouts/PublicLayout';
+import Link from 'next/link';
 
 export default function SessionExpiredPage() {
   return (
     <PublicLayout>
-      <div className="text-center space-y-6">
-        <div className="bg-red-900/30 border border-red-500/30 rounded-lg p-8 mb-8">
-          <h1 className="text-3xl font-bold text-red-400 mb-4">
+      <main className="bg-deep-navy rounded-2xl p-8 border border-blue-gray/30 shadow-md space-y-6">
+        <div className="space-y-4">
+          <h2 className="text-mint text-lg font-bold">
             Sessão Expirada
-          </h1>
-          <p className="text-gray-300 text-lg">
-            Sua sessão expirou. Por favor, acesse o sistema novamente para continuar.
-          </p>
-        </div>
-
-        <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
-          <h2 className="text-2xl font-semibold text-gray-200 mb-4">
-            Por que isso aconteceu?
           </h2>
-          <ul className="text-gray-400 text-left space-y-4 max-w-2xl mx-auto">
-            <li className="flex items-start">
-              <span className="mr-2">•</span>
-              <span>Sua sessão pode ter expirado por inatividade</span>
+          <p className="text-gray-lighter text-sm leading-relaxed">
+            Sua sessão expirou por um dos seguintes motivos:
+          </p>
+          <ul className="space-y-2 text-sm text-gray-light">
+            <li className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-mint"></span>
+              Inatividade por tempo prolongado
             </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span>
-              <span>Você pode ter sido desconectado por questões de segurança</span>
+            <li className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-mint"></span>
+              Desconexão por motivos de segurança
             </li>
-            <li className="flex items-start">
-              <span className="mr-2">•</span>
-              <span>Pode ter ocorrido um problema com suas permissões de acesso</span>
+            <li className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-mint"></span>
+              Alterações nas permissões de acesso
             </li>
           </ul>
+          
+          <div className="mt-8 flex justify-center">
+            <Link
+              href="/api/auth/login"
+              className="logout-link"
+            >
+              Fazer Login Novamente
+            </Link>
+          </div>
         </div>
-      </div>
+      </main>
     </PublicLayout>
   );
 } 
