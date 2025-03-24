@@ -21,7 +21,7 @@ export default function App({ Component, pageProps }) {
         <meta property="og:type" content="website" />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:image" content="/images/og-image.png" />
+        <meta property="og:image" content="/opengraph-image.png" />
         <meta property="og:site_name" content="Goalmoon TODO" />
         <meta property="og:locale" content="pt_BR" />
 
@@ -34,7 +34,7 @@ export default function App({ Component, pageProps }) {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content="/images/og-image.png" />
+        <meta name="twitter:image" content="/opengraph-image.png" />
         
         {/* Preload da imagem do logo */}
         <link
