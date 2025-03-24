@@ -3,8 +3,6 @@ import Head from 'next/head';
 export default function BaseLayout({ children }) {
   const title = "Goalmoon TODO";
   const description = "Gerencie suas tarefas com simplicidade e segurança usando Next.js, Supabase e Auth0";
-  const url = "https://todo.gmoon.com.br";
-  const imageUrl = "https://todo.gmoon.com.br/images/og-image.png";
 
   return (
     <>
@@ -17,10 +15,9 @@ export default function BaseLayout({ children }) {
         
         {/* OpenGraph / Facebook */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={url} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:image" content={imageUrl} />
+        <meta property="og:image" content="/images/og-image.png" />
         <meta property="og:site_name" content="Goalmoon TODO" />
         <meta property="og:locale" content="pt_BR" />
 
@@ -31,10 +28,10 @@ export default function BaseLayout({ children }) {
 
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:url" content={url} />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={imageUrl} />
+        <meta name="twitter:image" content="/images/og-image.png" />
+        
         {/* Preload da imagem do logo */}
         <link
           rel="preload"
