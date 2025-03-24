@@ -5,7 +5,7 @@ import { todoService } from '../services/todoService';
 import logger from '../utils/logger';
 
 export function useTodos() {
-  const { user } = useUser();
+  const { user, isLoading: authLoading } = useUser();
   const router = useRouter();
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,12 +13,23 @@ export function useTodos() {
 
   useEffect(() => {
     let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 3;
 
     const fetchTodos = async () => {
       try {
-        if (!user?.sub) return;
+        if (authLoading || !user?.sub) return;
         
-        // Usa o token do Supabase que foi gerado no callback do Auth0
+        // Verifica se o token está próximo de expirar (5 minutos)
+        const tokenExp = user.accessToken ? JSON.parse(atob(user.accessToken.split('.')[1])).exp : 0;
+        const now = Math.floor(Date.now() / 1000);
+        
+        if (tokenExp - now < 300) { // 5 minutos
+          logger.warn('Token próximo de expirar, redirecionando para login');
+          router.push('/api/auth/logout');
+          return;
+        }
+
         const data = await todoService.getTodos(user.accessToken, user.sub);
         if (isMounted) {
           setTodos(data);
@@ -27,11 +38,21 @@ export function useTodos() {
       } catch (err) {
         if (isMounted) {
           logger.error('Erro ao buscar tarefas:', err);
-          // Se o erro for de JWT expirado ou não autorizado, redireciona para a página inicial
+          
           if (err.message?.includes('JWT') || err.status === 401) {
-            router.push('/');
+            if (retryCount < maxRetries) {
+              retryCount++;
+              logger.info(`Tentativa ${retryCount} de ${maxRetries} de renovar o token`);
+              // Aguarda 1 segundo antes de tentar novamente
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              fetchTodos();
+            } else {
+              logger.error('Número máximo de tentativas atingido, redirecionando para login');
+              router.push('/api/auth/logout');
+            }
             return;
           }
+          
           setError('Erro ao carregar tarefas');
         }
       } finally {
@@ -45,7 +66,7 @@ export function useTodos() {
     return () => {
       isMounted = false;
     };
-  }, [user, router]);
+  }, [user, router, authLoading]);
 
   const addTodo = async (content) => {
     try {
@@ -55,7 +76,7 @@ export function useTodos() {
     } catch (err) {
       logger.error('Erro ao adicionar tarefa:', err);
       if (err.message?.includes('JWT') || err.status === 401) {
-        router.push('/');
+        router.push('/api/auth/logout');
         return;
       }
       setError('Erro ao adicionar tarefa');
@@ -70,7 +91,7 @@ export function useTodos() {
     } catch (err) {
       logger.error('Erro ao editar tarefa:', err);
       if (err.message?.includes('JWT') || err.status === 401) {
-        router.push('/');
+        router.push('/api/auth/logout');
         return;
       }
       setError('Erro ao editar tarefa');
@@ -85,7 +106,7 @@ export function useTodos() {
     } catch (err) {
       logger.error('Erro ao excluir tarefa:', err);
       if (err.message?.includes('JWT') || err.status === 401) {
-        router.push('/');
+        router.push('/api/auth/logout');
         return;
       }
       setError('Erro ao excluir tarefa');

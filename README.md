@@ -1496,9 +1496,9 @@ if (err.message?.includes('JWT') || err.status === 401) {
   - Feedback claro sobre o status da sessão
 
 - **Segurança**:
-  - Tokens com tempo de vida controlado
-  - Validação constante de autenticação
-  - Tratamento adequado de erros de autorização
+  - Tokens são gerenciados de forma segura
+  - Roles são validadas em múltiplas camadas
+  - Sessões são limpas adequadamente
 
 - **Manutenibilidade**:
   - Código organizado em componentes reutilizáveis
@@ -1510,4 +1510,156 @@ if (err.message?.includes('JWT') || err.status === 401) {
 - Implementar refresh token automático
 - Adicionar mais informações institucionais na landing page
 - Melhorar feedback visual durante transições de autenticação
+
+## 8. Correção do Mecanismo de Autenticação e RBAC
+
+### Visão Geral do Sistema
+
+O sistema implementa um mecanismo robusto de autenticação e RBAC (Role-Based Access Control) utilizando Auth0 e Supabase. O fluxo funciona da seguinte forma:
+
+1. **Autenticação com Auth0**:
+   - O usuário faz login através do Auth0
+   - O Auth0 gera um JWT contendo as roles do usuário
+   - O token é armazenado na sessão do usuário
+
+2. **Integração com Supabase**:
+   - Um token específico para o Supabase é gerado usando o JWT do Auth0
+   - O token do Supabase inclui as roles do usuário
+   - O Supabase valida o token e aplica as políticas de RLS baseadas nas roles
+
+3. **Controle de Acesso**:
+   - As roles definem quais operações o usuário pode realizar
+   - O RLS do Supabase garante que apenas usuários autorizados acessem os dados
+   - A interface se adapta às roles do usuário
+
+### Componentes Principais
+
+#### 1. `pages/api/auth/[...auth0].js`
+Este arquivo é crucial para o processo de autenticação:
+
+```javascript
+const afterCallback = async (req, res, session) => {
+  // Decodifica o token do Auth0
+  const decodedToken = jwt.decode(session.idToken);
+  
+  // Gera um token específico para o Supabase
+  const supabaseToken = jwt.sign(payload, process.env.SUPABASE_SIGNING_SECRET);
+  
+  // Adiciona o token à sessão
+  session.user.accessToken = supabaseToken;
+  return session;
+};
+```
+
+**Funções principais**:
+- Gerencia o fluxo de autenticação do Auth0
+- Gera o token do Supabase com as roles do usuário
+- Configura a sessão do usuário
+
+#### 2. `utils/supabase.js`
+Gerencia a conexão com o Supabase:
+
+```javascript
+let supabaseClient = null;
+
+export const getSupabase = (accessToken) => {
+  if (!supabaseClient) {
+    supabaseClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false
+        }
+      }
+    );
+  }
+  
+  // Atualiza o token de autorização
+  supabaseClient.auth.setSession({
+    access_token: accessToken,
+    refresh_token: null
+  });
+  
+  return supabaseClient;
+};
+```
+
+**Funções principais**:
+- Mantém uma única instância do cliente Supabase
+- Atualiza o token de autorização quando necessário
+- Evita problemas de token expirado
+
+### Controle de Expiração do Token
+
+O sistema implementa um mecanismo robusto de controle de expiração:
+
+1. **Token do Auth0**:
+   - Tem um tempo de vida padrão configurado no Auth0
+   - É renovado automaticamente pelo Auth0
+
+2. **Token do Supabase**:
+   - Expira antes do token do Auth0 (1 hora)
+   - É gerado com as roles do usuário
+   - É atualizado quando necessário
+
+3. **Tratamento de Erros**:
+   - Verifica a expiração do token antes das operações
+   - Redireciona para logout se o token estiver próximo de expirar
+   - Implementa retry mechanism para operações falhas
+
+### Área Logada
+
+O sistema implementa uma área logada protegida:
+
+1. **Middleware de Proteção**:
+   - Verifica a autenticação do usuário
+   - Redireciona para login se não autenticado
+   - Mantém o estado da sessão
+
+2. **Componentes Protegidos**:
+   - Só são acessíveis a usuários autenticados
+   - Adaptam-se às roles do usuário
+   - Implementam tratamento de erros de autenticação
+
+3. **Fluxo de Navegação**:
+   - Usuários não autenticados são redirecionados para login
+   - Usuários autenticados têm acesso ao dashboard
+   - Logout limpa a sessão e redireciona para home
+
+### Boas Práticas Implementadas
+
+1. **Segurança**:
+   - Tokens são gerenciados de forma segura
+   - Roles são validadas em múltiplas camadas
+   - Sessões são limpas adequadamente
+
+2. **Performance**:
+   - Cliente Supabase é reutilizado
+   - Tokens são atualizados apenas quando necessário
+   - Cache é gerenciado eficientemente
+
+3. **Manutenibilidade**:
+   - Código é modular e bem organizado
+   - Logs detalhados para debug
+   - Tratamento de erros robusto
+
+### Solução de Problemas Comuns
+
+1. **Token Expirado**:
+   - Verifique os logs do Auth0
+   - Confirme as configurações de expiração
+   - Verifique o fluxo de renovação
+
+2. **Roles não Aplicadas**:
+   - Verifique o namespace no Auth0
+   - Confirme as roles no token
+   - Valide as políticas RLS
+
+3. **Loop de Autenticação**:
+   - Verifique o cliente Supabase
+   - Confirme o gerenciamento de sessão
+   - Valide os redirecionamentos
 

@@ -1,0 +1,58 @@
+@startuml
+title Fluxo de Autenticação e RBAC
+
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+
+box "Client (Browser)" #LightBlue
+    participant "Next.js\n(pages/dashboard.js)" as Dashboard
+    participant "Next.js\n(hooks/useTodos.js)" as UseTodos
+    participant "Next.js\n(services/todoService.js)" as TodoService
+end box
+
+box "Server (Vercel)" #LightGreen
+    participant "Next.js\n(pages/api/auth/[...auth0].js)" as Auth0Handler
+    participant "Next.js\n(utils/supabase.js)" as SupabaseClient
+end box
+
+box "External Services" #LightYellow
+    participant "Auth0" as Auth0
+    participant "Supabase" as Supabase
+end box
+
+actor Usuário
+
+== Login ==
+Usuário -> Auth0Handler: Acessa /api/auth/login
+Auth0Handler -> Auth0: Redireciona para Auth0
+Auth0 -> Usuário: Exibe tela de login
+Usuário -> Auth0: Insere credenciais
+Auth0 -> Auth0: Valida credenciais
+Auth0 -> Auth0: Gera JWT com roles
+Auth0 -> Auth0Handler: Retorna JWT (ID Token + Access Token)
+Auth0Handler -> Auth0Handler: Decodifica JWT
+Auth0Handler -> Supabase: Gera token Supabase
+Supabase -> Auth0Handler: Retorna token Supabase
+Auth0Handler -> Usuário: Redireciona para dashboard
+
+== Acesso a Dados ==
+Usuário -> Dashboard: Acessa dashboard
+Dashboard -> UseTodos: fetchTodos()
+UseTodos -> TodoService: fetchTodos()
+TodoService -> SupabaseClient: getSupabase(token)
+SupabaseClient -> Supabase: Requisição com token
+Supabase -> Supabase: Valida token e roles
+Supabase -> Supabase: Aplica políticas RLS
+Supabase -> TodoService: Retorna dados filtrados
+TodoService -> UseTodos: Retorna todos
+UseTodos -> Dashboard: Atualiza estado
+Dashboard -> Usuário: Renderiza interface
+
+== Expiração de Token ==
+Note over Usuário,Dashboard: Token próximo de expirar
+Dashboard -> UseTodos: Verifica expiração
+UseTodos -> Auth0Handler: Redireciona para logout
+Auth0Handler -> Auth0: Limpa sessão
+Auth0Handler -> Usuário: Redireciona para login
+
+@enduml 
