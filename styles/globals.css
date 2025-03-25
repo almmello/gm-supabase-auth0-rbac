@@ -111,7 +111,7 @@
   /* Header */
   .dashboard-header {
     @apply bg-gradient-to-r from-[#374161] to-[#3F4A6E]
-           border-b border-[#6374AD]/20 mb-12
+           border-b border-[#6374AD]/20 mb-0 md:mb-12
            shadow-[0_4px_16px_-4px_rgba(55,65,97,0.3)];
   }
 

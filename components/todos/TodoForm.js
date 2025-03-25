@@ -29,7 +29,7 @@ export default function TodoForm({ onSubmit }) {
         {/* Botão Mobile */}
         <button
           type="submit"
-          className="md:hidden bg-[#71b399] hover:bg-[#5ea386] text-white rounded-full p-2 transition-colors"
+          className="md:hidden bg-[#71b399] hover:bg-[#5ea386] text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
           aria-label="Adicionar tarefa"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">

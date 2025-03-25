@@ -32,9 +32,9 @@ function Dashboard({ user: serverUser }) {
   return (
     <BaseLayout>
       <div className="dashboard-container bg-[#374161]">
-        <header className="dashboard-header border-b-0 md:border-b">
-          <div className="header-content flex justify-between items-center px-4 py-3 md:px-8">
-            <div className="header-left md:w-[120px]">
+        <header className="dashboard-header mb-0">
+          <div className="header-content flex justify-between items-center px-0 py-3 md:px-8">
+            <div className="header-left md:w-[120px] pl-4 md:pl-0">
               <div className="hidden md:block">
                 <Image
                   src="/images/goalmoon-logo.png"
@@ -54,7 +54,7 @@ function Dashboard({ user: serverUser }) {
               <h1 className="text-white text-xl font-bold">TODO</h1>
             </div>
             
-            <div className="header-right flex items-center gap-4">
+            <div className="header-right flex items-center gap-4 pr-4 md:pr-0">
               <div className="hidden md:flex items-center gap-4">
                 <span className="text-white">{currentUser.name}</span>
                 <span className={`px-4 py-1 rounded-md ${isAdmin ? 'bg-[#71b399]' : 'bg-[#6374AD]'} text-white`}>
