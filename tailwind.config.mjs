@@ -32,6 +32,10 @@ export default {
       fontFamily: {
         'montserrat': ['Montserrat', 'sans-serif'],
       },
+      backgroundImage: {
+        'logo': 'url("/images/goalmoon-logo.png")',
+        'logo-small': 'url("/images/goalmoon-logo-small.png")',
+      },
     },
   },
   plugins: [],

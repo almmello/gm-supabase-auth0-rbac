@@ -23,14 +23,10 @@ export default function Home() {
 
   return (
     <div className="landing-container">
-      <nav className="landing-nav">
-        <Image
-          src="/images/goalmoon-logo.png"
-          alt="Goalmoon"
-          width={180}
-          height={40}
-          priority
-          className="landing-logo"
+      <nav className="landing-nav flex items-center justify-between">
+        <div className="h-20 w-20 md:w-[180px] md:h-10 bg-logo-small md:bg-logo bg-no-repeat bg-contain bg-center" 
+             role="img" 
+             aria-label="Goalmoon Logo" 
         />
         <a
           href="/api/auth/login"

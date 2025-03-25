@@ -4,19 +4,7 @@ import Image from 'next/image';
 export default function PublicLayout({ children }) {
   return (
     <div className="landing-container">
-      <nav className="landing-nav">
-        <Image
-          src="/images/goalmoon-logo.png"
-          alt="Goalmoon Logo"
-          width={180}
-          height={40}
-          priority
-          className="landing-logo"
-        />
-        <Link href="/api/auth/login" className="landing-nav-button">
-          Login
-        </Link>
-      </nav>
+
 
       <main className="landing-hero">
         <div className="landing-content">
