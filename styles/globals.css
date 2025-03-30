@@ -181,6 +181,25 @@
            transition-all duration-200;
   }
 
+  /* Botões do TodoForm */
+  .todo-form-button-desktop {
+    @apply action-button button-primary hidden md:block md:py-1.5;
+  }
+
+  .todo-form-button-mobile {
+    @apply md:hidden bg-[#71b399] hover:bg-[#5ea386] text-white 
+           rounded-full w-10 h-10 flex items-center justify-center 
+           transition-colors relative;
+  }
+
+  .todo-form-button-mobile::before {
+    @apply content-['+'] text-2xl font-semibold absolute;
+  }
+
+  .todo-form-button-icon {
+    @apply w-6 h-6;
+  }
+
   .todo-list {
     @apply space-y-3;
   }
