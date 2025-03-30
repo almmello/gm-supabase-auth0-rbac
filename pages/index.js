@@ -1,5 +1,4 @@
 import { useUser } from '@auth0/nextjs-auth0/client';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
@@ -23,8 +22,8 @@ export default function Home() {
 
   return (
     <div className="landing-container">
-      <nav className="landing-nav flex items-center justify-between">
-        <div className="h-20 w-20 md:w-[180px] md:h-10 bg-logo-small md:bg-logo bg-no-repeat bg-contain bg-center" 
+      <nav className="landing-nav dash-flex">
+        <div className="landing-logo" 
              role="img" 
              aria-label="Goalmoon Logo" 
         />
