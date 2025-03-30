@@ -163,7 +163,7 @@
 
   .todo-form {
     @apply bg-gradient-to-br from-[#374161] to-[#3F4A6E]
-           rounded-2xl p-6 mb-8
+           rounded-2xl p-6 mb-8 md:mt-12
            border border-[#6374AD]/20 
            shadow-[0_8px_32px_-8px_rgba(55,65,97,0.5)];
   }
