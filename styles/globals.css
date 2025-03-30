@@ -224,6 +224,41 @@
     @apply flex items-center gap-3 justify-end;
   }
 
+  /* Botões do TodoList */
+  .todo-list-buttons-desktop {
+    @apply hidden md:block md:space-x-2;
+  }
+
+  .todo-list-button-edit {
+    @apply action-button button-secondary md:py-1.5;
+  }
+
+  .todo-list-button-delete {
+    @apply action-button button-danger md:py-1.5;
+  }
+
+  .todo-list-buttons-mobile {
+    @apply md:hidden flex gap-2;
+  }
+
+  .todo-list-button-edit-mobile {
+    @apply bg-[#6374AD] hover:bg-[#566294] text-white rounded-full w-10 h-10 
+           flex items-center justify-center transition-colors;
+  }
+
+  .todo-list-button-edit-mobile::before {
+    @apply content-['✎'] text-lg font-semibold absolute;
+  }
+
+  .todo-list-button-delete-mobile {
+    @apply bg-[#E6E0D3] hover:bg-[#E2DBCD] text-[#374161] rounded-full w-10 h-10 
+           flex items-center justify-center transition-colors;
+  }
+
+  .todo-list-button-delete-mobile::before {
+    @apply content-['×'] text-2xl font-semibold absolute;
+  }
+
   .action-button {
     @apply px-4 py-1.5 rounded-full text-sm font-medium
            transition-all duration-200
