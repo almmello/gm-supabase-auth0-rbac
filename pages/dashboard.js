@@ -31,11 +31,11 @@ function Dashboard({ user: serverUser }) {
 
   return (
     <BaseLayout>
-      <div className="dashboard-container bg-[#374161]">
-        <header className="dashboard-header mb-0">
-          <div className="header-content flex justify-between items-center px-0 py-3 md:px-8">
-            <div className="header-left md:w-[120px] pl-4 md:pl-0">
-              <div className="hidden md:block">
+      <div className="dashboard-container bg-deep-navy">
+        <header className="dash-header">
+          <div className="dash-header-grid">
+            <div className="dash-logo-wrapper">
+              <div className="dashboard-logo-desktop">
                 <Image
                   src="/images/goalmoon-logo.png"
                   alt="Goalmoon"
@@ -44,26 +44,26 @@ function Dashboard({ user: serverUser }) {
                   priority
                 />
               </div>
-              <div className="md:hidden h-20 w-20 bg-logo-small bg-no-repeat bg-contain bg-center" 
+              <div className="dashboard-logo-mobile" 
                    role="img" 
                    aria-label="Goalmoon Logo" 
               />
             </div>
             
-            <div className="header-center">
-              <h1 className="text-white text-xl font-bold">TODO</h1>
+            <div className="dash-flex-center">
+              <h1 className="dash-title">TODO</h1>
             </div>
             
-            <div className="header-right flex items-center gap-4 pr-4 md:pr-0">
-              <div className="hidden md:flex items-center gap-4">
+            <div className="dash-flex-end">
+              <div className="dashboard-nav-user">
                 <span className="text-white">{currentUser.name}</span>
-                <span className={`px-4 py-1 rounded-md ${isAdmin ? 'bg-[#71b399]' : 'bg-[#6374AD]'} text-white`}>
+                <span className={`dashboard-badge ${isAdmin ? 'dashboard-badge-admin' : 'dashboard-badge-user'}`}>
                   {isAdmin ? 'Admin' : 'Usuário'}
                 </span>
               </div>
               <a
                 href="/api/auth/logout"
-                className="md:bg-[#E6E0D3] md:text-[#374161] bg-[#E6E0D3] text-[#374161] rounded-full md:rounded-2xl px-6 py-1.5 text-sm font-medium hover:bg-[#E2DBCD] transition-colors"
+                className="dashboard-logout-button"
               >
                 Sair
               </a>
@@ -71,18 +71,18 @@ function Dashboard({ user: serverUser }) {
           </div>
         </header>
 
-        <div className="md:hidden bg-[#293047] border-t border-[#3F4A6E] px-4 py-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[#dbe2ea] text-sm truncate max-w-[60%]">
+        <div className="dashboard-mobile-info">
+          <div className="dash-flex">
+            <span className="dashboard-user-email">
               {currentUser.email}
             </span>
-            <span className={`px-4 py-1 rounded-full text-sm ${isAdmin ? 'bg-[#71b399]' : 'bg-[#6374AD]'} text-white`}>
+            <span className={`dashboard-mobile-badge ${isAdmin ? 'dashboard-badge-admin' : 'dashboard-badge-user'}`}>
               {isAdmin ? 'Admin' : 'Usuário'}
             </span>
           </div>
         </div>
 
-        <main className="dashboard-content px-4 md:px-8 mt-6 md:mt-0">
+        <main className="dashboard-main">
           <TodoForm onSubmit={addTodo} />
           
           {error && (

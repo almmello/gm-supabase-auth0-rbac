@@ -109,10 +109,39 @@
   }
 
   /* Header */
-  .dashboard-header {
-    @apply bg-gradient-to-r from-[#374161] to-[#3F4A6E]
-           border-b border-[#6374AD]/20 mb-0 md:mb-12
+  .dash-header {
+    @apply bg-gradient-to-r from-deep-navy to-blue-gray
+           border-b border-blue-light/20 mb-0 md:mb-12
            shadow-[0_4px_16px_-4px_rgba(55,65,97,0.3)];
+  }
+
+  .dash-header-grid {
+    @apply max-w-7xl mx-auto px-8 py-4
+           grid grid-cols-3 items-center;
+  }
+
+  .dash-logo-wrapper {
+    @apply flex items-center md:w-[120px] pl-4 md:pl-0;
+  }
+
+  .dash-title {
+    @apply text-white text-xl font-bold;
+  }
+
+  .dash-flex {
+    @apply flex items-center justify-between;
+  }
+
+  .dash-flex-center {
+    @apply flex items-center justify-center;
+  }
+
+  .dash-flex-end {
+    @apply flex items-center justify-end gap-16;
+  }
+
+  .dash-mobile-user {
+    @apply flex items-center justify-between;
   }
 
   .header-content {
@@ -301,5 +330,65 @@
   .dashboard-footer {
     @apply py-6 text-center text-[#6374AD] text-sm font-medium
            border-t border-[#6374AD]/20 mt-8;
+  }
+
+  /* Dashboard Header */
+  .dashboard-logout-button {
+    @apply md:bg-cream md:text-deep-navy bg-cream text-deep-navy 
+           rounded-full md:rounded-2xl px-6 py-1.5 text-sm font-medium 
+           hover:bg-cream-light transition-colors ml-8;
+  }
+
+  .dashboard-badge {
+    @apply px-4 py-1 rounded-full text-white;
+  }
+
+  .dashboard-badge-admin {
+    @apply bg-mint;
+  }
+
+  .dashboard-badge-user {
+    @apply bg-blue-light;
+  }
+
+  .dashboard-mobile-badge {
+    @apply px-4 py-1 rounded-full text-sm text-white;
+  }
+
+  .dashboard-user-email {
+    @apply text-gray-light text-sm truncate max-w-[60%];
+  }
+
+  .dashboard-mobile-info {
+    @apply md:hidden bg-dark-slate border-t border-blue-gray px-4 py-2;
+  }
+
+  /* Dashboard Layout */
+  .dashboard-logo {
+    @apply h-20 w-20 bg-logo-small bg-no-repeat bg-contain bg-center;
+  }
+
+  .dashboard-logo-desktop {
+    @apply hidden md:block;
+  }
+
+  .dashboard-logo-mobile {
+    @apply md:hidden dashboard-logo;
+  }
+
+  .dashboard-nav {
+    @apply flex items-center gap-4;
+  }
+
+  .dashboard-nav-right {
+    @apply flex items-center gap-12 pr-4 md:pr-0;
+  }
+
+  .dashboard-nav-user {
+    @apply hidden md:flex items-center gap-6;
+  }
+
+  .dashboard-main {
+    @apply max-w-4xl mx-auto px-4 md:px-8 mt-6 md:mt-0;
   }
 }
