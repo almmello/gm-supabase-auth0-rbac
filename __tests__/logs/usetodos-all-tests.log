@@ -1,0 +1,547 @@
+
+> gm-supabase-auth0-rbac@0.1.0 test
+> jest __tests__/hooks/useTodos.failing.test.js __tests__/hooks/useTodos.passing.test.js
+
+
+> gm-supabase-auth0-rbac@0.1.0 test
+> jest __tests__/hooks/useTodos.failing.test.js __tests__/hooks/useTodos.passing.test.js
+
+PASS __tests__/hooks/useTodos.failing.test.js
+  ● Console
+
+    console.log
+      
+      === Iniciando novo teste ===
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:69:13)
+
+    console.log
+      Cenário: useTodos hooks - testes que falham deleta todo corretamente
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:70:13)
+
+    console.log
+      Estado inicial: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:71:13)
+
+    console.log
+      Testando deleção de todo...
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:107:13)
+
+    console.log
+      Hook renderizado
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:111:13)
+
+    console.log
+      Estado inicial carregado: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:118:13)
+
+    console.log
+      Todo deletado, novo estado: [ { id: 2, content: 'Test todo 2', user_id: 'test-user-id' } ]
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:124:13)
+
+    console.log
+      ✓ API chamada corretamente
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:138:13)
+
+    console.log
+      ✓ Teste de deleção concluído com sucesso
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:139:13)
+
+    console.log
+      
+      === Iniciando novo teste ===
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:69:13)
+
+    console.log
+      Cenário: useTodos hooks - testes que falham adiciona todo na última posição
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:70:13)
+
+    console.log
+      Estado inicial: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:71:13)
+
+    console.log
+      Testando adição de todo...
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:148:13)
+
+    console.log
+      Hook renderizado
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:152:13)
+
+    console.log
+      Estado inicial carregado: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:159:13)
+
+    console.log
+      Todo adicionado, novo estado: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' },
+        { id: 3, content: 'New todo', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:165:13)
+
+    console.log
+      ✓ Ordem dos todos mantida corretamente
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:175:13)
+
+    console.log
+      ✓ Teste de adição concluído com sucesso
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:176:13)
+
+    console.log
+      
+      === Iniciando novo teste ===
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:69:13)
+
+    console.log
+      Cenário: useTodos hooks - testes que falham edita todo corretamente
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:70:13)
+
+    console.log
+      Estado inicial: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:71:13)
+
+    console.log
+      Testando edição de todo...
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:185:13)
+
+    console.log
+      Hook renderizado
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:189:13)
+
+    console.log
+      Estado inicial carregado: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:196:13)
+
+    console.log
+      Todo editado, novo estado: [
+        { id: 1, content: 'Updated todo', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:202:13)
+
+    console.log
+      ✓ API chamada corretamente
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:217:13)
+
+    console.log
+      ✓ Teste de edição concluído com sucesso
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:218:13)
+
+    console.log
+      
+      === Todos os testes passaram com sucesso! ===
+
+      at Object.log (__tests__/hooks/useTodos.failing.test.js:223:13)
+
+PASS __tests__/hooks/useTodos.passing.test.js
+  ● Console
+
+    console.log
+      
+      === Iniciando novo teste ===
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:63:13)
+
+    console.log
+      Cenário: useTodos hooks - testes que passam busca todos corretamente
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:64:13)
+
+    console.log
+      Estado inicial: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:65:13)
+
+    console.log
+      Testando busca de todos...
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:89:13)
+
+    console.log
+      Hook renderizado
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:93:13)
+
+    console.log
+      Estado carregado: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:100:13)
+
+    console.log
+      ✓ API chamada corretamente
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:107:13)
+
+    console.log
+      ✓ Nenhum erro encontrado
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:110:13)
+
+    console.log
+      ✓ Teste de busca concluído com sucesso
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:111:13)
+
+    console.log
+      
+      === Iniciando novo teste ===
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:63:13)
+
+    console.log
+      Cenário: useTodos hooks - testes que passam edita todo corretamente
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:64:13)
+
+    console.log
+      Estado inicial: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:65:13)
+
+    console.log
+      Testando edição de todo...
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:120:13)
+
+    console.log
+      Hook renderizado
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:124:13)
+
+    console.log
+      Estado inicial carregado: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:131:13)
+
+    console.log
+      Todo editado, novo estado: [
+        { id: 1, content: 'Updated todo', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:137:13)
+
+    console.log
+      ✓ API chamada corretamente
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:152:13)
+
+    console.log
+      ✓ Teste de edição concluído com sucesso
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:153:13)
+
+    console.log
+      
+      === Todos os testes passaram com sucesso! ===
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:158:13)
+
+
+Test Suites: 2 passed, 2 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        1.178 s
+Ran all test suites matching /__tests__\/hooks\/useTodos.failing.test.js|__tests__\/hooks\/useTodos.passing.test.js/i.
+
+> gm-supabase-auth0-rbac@0.1.0 test
+> jest __tests__/hooks/useTodos.failing.test.js __tests__/hooks/useTodos.passing.test.js
+
+FAIL __tests__/hooks/useTodos.failing.test.js
+  ● Test suite failed to run
+
+    Your test suite must contain at least one test.
+
+      at onResult (node_modules/@jest/core/build/TestScheduler.js:133:18)
+      at node_modules/@jest/core/build/TestScheduler.js:254:19
+      at node_modules/emittery/index.js:363:13
+          at Array.map (<anonymous>)
+      at Emittery.emit (node_modules/emittery/index.js:361:23)
+
+PASS __tests__/hooks/useTodos.passing.test.js
+  ● Console
+
+    console.log
+      
+      === Iniciando novo teste ===
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:69:13)
+
+    console.log
+      Cenário: useTodos hooks - testes que passam busca todos corretamente
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:70:13)
+
+    console.log
+      Estado inicial: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:71:13)
+
+    console.log
+      Testando busca de todos...
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:107:13)
+
+    console.log
+      Hook renderizado
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:111:13)
+
+    console.log
+      Estado carregado: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:118:13)
+
+    console.log
+      ✓ API chamada corretamente
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:125:13)
+
+    console.log
+      ✓ Nenhum erro encontrado
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:128:13)
+
+    console.log
+      ✓ Teste de busca concluído com sucesso
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:129:13)
+
+    console.log
+      
+      === Iniciando novo teste ===
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:69:13)
+
+    console.log
+      Cenário: useTodos hooks - testes que passam deleta todo corretamente
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:70:13)
+
+    console.log
+      Estado inicial: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:71:13)
+
+    console.log
+      Testando deleção de todo...
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:138:13)
+
+    console.log
+      Hook renderizado
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:142:13)
+
+    console.log
+      Estado inicial carregado: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:149:13)
+
+    console.log
+      Todo deletado, novo estado: [ { id: 2, content: 'Test todo 2', user_id: 'test-user-id' } ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:155:13)
+
+    console.log
+      ✓ API chamada corretamente
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:169:13)
+
+    console.log
+      ✓ Teste de deleção concluído com sucesso
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:170:13)
+
+    console.log
+      
+      === Iniciando novo teste ===
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:69:13)
+
+    console.log
+      Cenário: useTodos hooks - testes que passam adiciona todo na última posição
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:70:13)
+
+    console.log
+      Estado inicial: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:71:13)
+
+    console.log
+      Testando adição de todo...
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:179:13)
+
+    console.log
+      Hook renderizado
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:183:13)
+
+    console.log
+      Estado inicial carregado: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:190:13)
+
+    console.log
+      Todo adicionado, novo estado: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' },
+        { id: 3, content: 'New todo', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:196:13)
+
+    console.log
+      ✓ Ordem dos todos mantida corretamente
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:206:13)
+
+    console.log
+      ✓ Teste de adição concluído com sucesso
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:207:13)
+
+    console.log
+      
+      === Iniciando novo teste ===
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:69:13)
+
+    console.log
+      Cenário: useTodos hooks - testes que passam edita todo corretamente
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:70:13)
+
+    console.log
+      Estado inicial: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:71:13)
+
+    console.log
+      Testando edição de todo...
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:216:13)
+
+    console.log
+      Hook renderizado
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:220:13)
+
+    console.log
+      Estado inicial carregado: [
+        { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:227:13)
+
+    console.log
+      Todo editado, novo estado: [
+        { id: 1, content: 'Updated todo', user_id: 'test-user-id' },
+        { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+      ]
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:233:13)
+
+    console.log
+      ✓ API chamada corretamente
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:248:13)
+
+    console.log
+      ✓ Teste de edição concluído com sucesso
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:249:13)
+
+    console.log
+      
+      === Todos os testes passaram com sucesso! ===
+
+      at Object.log (__tests__/hooks/useTodos.passing.test.js:254:13)
+
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        1.915 s
+Ran all test suites matching /__tests__\/hooks\/useTodos.failing.test.js|__tests__\/hooks\/useTodos.passing.test.js/i.

@@ -1,0 +1,197 @@
+
+> gm-supabase-auth0-rbac@0.1.0 test
+> jest __tests__/components/TodoList.passing.test.js
+
+  console.log
+    
+    === Iniciando novo teste ===
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:27:13)
+
+  console.log
+    Cenário: TodoList - testes que passam renderiza lista de tarefas corretamente
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:28:13)
+
+  console.log
+    Dados de teste: [
+      { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+      { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+    ]
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:37:13)
+
+  console.log
+    Elementos encontrados: { todo1: '✓', todo2: '✓' }
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:46:13)
+
+  console.log
+    ✓ Teste concluído com sucesso
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:54:13)
+
+  console.log
+    
+    === Iniciando novo teste ===
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:27:13)
+
+  console.log
+    Cenário: TodoList - testes que passam botão de exclusão só aparece para admin
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:28:13)
+
+  console.log
+    Verificando permissões de exclusão...
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:63:13)
+
+  console.log
+    Botões de exclusão encontrados: 0
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:70:13)
+
+  console.log
+    ✓ Permissões verificadas com sucesso
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:74:13)
+
+  console.log
+    
+    === Iniciando novo teste ===
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:27:13)
+
+  console.log
+    Cenário: TodoList - testes que passam chama onDelete quando excluir é clicado (apenas admin)
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:28:13)
+
+  console.log
+    Testando comportamento de exclusão...
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:83:13)
+
+  console.log
+    Botão de exclusão: ✓ Não encontrado (ok)
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:90:13)
+
+  console.log
+    ✓ Comportamento de exclusão verificado
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:94:13)
+
+  console.log
+    
+    === Iniciando novo teste ===
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:27:13)
+
+  console.log
+    Cenário: TodoList - testes que passam renderiza mensagem quando não há tarefas
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:28:13)
+
+  console.log
+    Testando mensagem de lista vazia...
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:103:13)
+
+  console.log
+    Texto encontrado: Nenhuma tarefa encontrada. Adicione uma nova tarefa acima.
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:110:13)
+
+  console.log
+    ✓ Mensagem verificada com sucesso
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:114:13)
+
+  console.log
+    
+    === Iniciando novo teste ===
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:27:13)
+
+  console.log
+    Cenário: TodoList - testes que passam botão de edição está disponível para todos os usuários
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:28:13)
+
+  console.log
+    Testando disponibilidade dos botões de edição...
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:123:13)
+
+  console.log
+    Dados de teste: [
+      { id: 1, content: 'Test todo 1', user_id: 'test-user-id' },
+      { id: 2, content: 'Test todo 2', user_id: 'test-user-id' }
+    ]
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:124:13)
+
+  console.log
+    Botões encontrados: 4
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:131:13)
+
+  console.log
+    Botões: [
+      { text: 'Editar', type: 'desktop' },
+      { text: '', type: 'desktop' },
+      { text: 'Editar', type: 'desktop' },
+      { text: '', type: 'desktop' }
+    ]
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:132:13)
+
+  console.log
+    ✓ Número de botões correto
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:139:13)
+
+  console.log
+    
+    === Iniciando novo teste ===
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:27:13)
+
+  console.log
+    Cenário: TodoList - testes que passam chama onEdit quando editar é clicado
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:28:13)
+
+  console.log
+    Testando callback do botão de edição...
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:148:13)
+
+  console.log
+    Todo esperado: { id: 1, content: 'Test todo 1', user_id: 'test-user-id' }
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:149:13)
+
+  console.log
+    Botões disponíveis: 4
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:156:13)
+
+  console.log
+    Chamadas de onEdit: [ [ 1, 'Novo conteúdo da tarefa' ] ]
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:169:13)
+
+  console.log
+    ✓ Callback de edição verificado
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:172:13)
+
+  console.log
+    
+    === Todos os testes passaram com sucesso! ===
+
+      at Object.log (__tests__/components/TodoList.passing.test.js:177:13)
+

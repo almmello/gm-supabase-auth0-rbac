@@ -1,0 +1,25 @@
+
+> gm-supabase-auth0-rbac@0.1.0 test
+> jest __tests__/components/TodoList.failing.test.js
+
+  console.log
+    
+    === Status dos Testes ===
+
+      at Object.log (__tests__/components/TodoList.failing.test.js:17:13)
+
+  console.log
+    ✓ Todos os testes que falhavam foram corrigidos
+
+      at Object.log (__tests__/components/TodoList.failing.test.js:18:13)
+
+  console.log
+    ✓ Os testes foram movidos para TodoList.passing.test.js
+
+      at Object.log (__tests__/components/TodoList.failing.test.js:19:13)
+
+  console.log
+    ✓ Esta suite agora serve como documentação das correções
+
+      at Object.log (__tests__/components/TodoList.failing.test.js:20:13)
+
