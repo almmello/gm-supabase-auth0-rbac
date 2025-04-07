@@ -231,9 +231,9 @@ enabled = false
 
 # Use Auth0 as a third-party provider alongside Supabase Auth.
 [auth.third_party.auth0]
-enabled = true
-tenant = "gm-supabase-tutorial"
-tenant_region = "us"
+enabled = false
+# tenant = "your-tenant"
+# tenant_region = "us"
 
 # Use AWS Cognito (Amplify) as a third-party provider alongside Supabase Auth.
 [auth.third_party.aws_cognito]
