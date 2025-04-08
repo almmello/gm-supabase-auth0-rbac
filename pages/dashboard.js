@@ -27,7 +27,7 @@ function Dashboard({ user: serverUser }) {
   }
 
   const currentUser = user || serverUser;
-  const isAdmin = currentUser['gm-supabase-tutorial.us.auth0.com/roles']?.includes('admin');
+  const isAdmin = currentUser[`${serverUser.audience}/roles`]?.includes('admin');
 
   return (
     <BaseLayout>
@@ -112,7 +112,10 @@ export const getServerSideProps = withPageAuthRequired({
     const session = await getSession(req, res);
     return {
       props: {
-        user: session?.user || null
+        user: {
+          ...session?.user,
+          audience: process.env.AUTH0_AUDIENCE
+        } || null
       }
     };
   }

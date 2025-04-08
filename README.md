@@ -44,7 +44,7 @@ A Action será executada automaticamente em cada login, modificando o token. No 
 
 ```js
 exports.onExecutePostLogin = async (event, api) => {
-  const namespace = 'https://myapp.example.com';  // use seu domínio aqui
+  const namespace = 'https://myapp.example.com/api';  // use seu domínio aqui (Precisa ser exatamente igual a variável AUTH0_AUDIENCE)
   if (event.authorization) {
     // Adicionar array de roles do usuário (se existirem) no ID Token e Access Token
     api.idToken.setCustomClaim(`${namespace}/roles`, event.authorization.roles);

@@ -18,7 +18,7 @@ const logger = {
 const afterCallback = async (req, res, session) => {
   try {
     const decodedToken = jwt.decode(session.idToken);
-    const namespace = process.env.NEXT_PUBLIC_AUTH0_NAMESPACE; 
+    const namespace = process.env.AUTH0_AUDIENCE;
 
     logger.info('JWT recebido do Auth0:', {
       token: session.idToken,
